@@ -20,7 +20,7 @@ public class CsvFormat {
     private int count;
 
     /** */
-    private List<Validator> validators = new ArrayList<Validator>();
+    private List<Validator> validators = new ArrayList<>();
 
     /** */
     public void addValidator(Validator validator) {

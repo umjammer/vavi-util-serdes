@@ -36,7 +36,7 @@ public class t110_2 {
         System.err.println("blocks: " + bean.getBlocks().size());
         Iterator<Block> i = bean.getBlocks().iterator();
         while (i.hasNext()) {
-            System.err.println("block: " + StringUtil.paramStringDeep(i.next()));
+            System.err.println("block: " + StringUtil.paramString(i.next()));
         }
     }
 }

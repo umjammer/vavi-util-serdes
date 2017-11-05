@@ -8,7 +8,7 @@ package vavi.util.binary;
 
 
 /**
- * 名前と値のペアを表すクラスです。
+ * 蜷榊燕縺ｨ蛟､縺ｮ繝壹い繧定｡ｨ縺吶け繝ｩ繧ｹ縺ｧ縺吶�
  *
  * @author	<a href="mailto:vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version	0.00	031216	vavi	initial version <br>

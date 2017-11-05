@@ -20,11 +20,11 @@ import java.util.Set;
  */
 public class DateValidator extends Validator {
 
-    /** {@link DateFormat} ‚Åg—p‚³‚ê‚éƒtƒH[ƒ}ƒbƒg‚Ì•¶š—ñ‚ÌƒRƒŒƒNƒVƒ‡ƒ“B */
-    private Set<String> formats = new HashSet<String>();
+    /** {@link DateFormat} ã§ä½¿ç”¨ã•ã‚Œã‚‹ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã®æ–‡å­—åˆ—ã®ã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³ã€‚ */
+    private Set<String> formats = new HashSet<>();
 
     /**
-     * @param format {@link DateFormat} ‚Åg—p‚³‚ê‚éƒtƒH[ƒ}ƒbƒg‚Ì•¶š—ñ
+     * @param format {@link DateFormat} ã§ä½¿ç”¨ã•ã‚Œã‚‹ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã®æ–‡å­—åˆ—
      */
     public void addFormat(String format) {
         this.formats.add(format);

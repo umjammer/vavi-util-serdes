@@ -20,7 +20,7 @@ public class StringValidator extends Validator {
     private Pattern pattern;
 
     /**
-     * @param regex マッチングさせる正規表現
+     * @param regex 繝槭ャ繝√Φ繧ｰ縺輔○繧区ｭ｣隕剰｡ｨ迴ｾ
      */
     public void setPattern(String regex) throws PatternSyntaxException {
         this.pattern = Pattern.compile(regex);

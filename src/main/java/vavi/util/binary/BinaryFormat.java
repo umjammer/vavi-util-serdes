@@ -20,7 +20,7 @@ import java.util.List;
 public class BinaryFormat {
 
     /** */
-    private List<Block> blocks = new ArrayList<Block>();
+    private List<Block> blocks = new ArrayList<>();
 
     /** */
     public void addBlock(Block block) {

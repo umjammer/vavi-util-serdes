@@ -46,7 +46,7 @@ public class Block {
     }
 
     /** */
-    private List<ReaderType> readerTypes = new ArrayList<ReaderType>();
+    private List<ReaderType> readerTypes = new ArrayList<>();
 
     /** */
     public void addReaderType(ReaderType readerType) {

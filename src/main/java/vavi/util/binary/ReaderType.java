@@ -59,7 +59,7 @@ public class ReaderType {
     }
 
     /** */
-    private List<Property> props = new ArrayList<Property>();
+    private List<Property> props = new ArrayList<>();
 
     /** */
     public void addProperty(Property property) {

@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * Block.
- * 
- * @author <a href="mailto:vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
+ *
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031216 vavi initial version <br>
  */
 public class Block {

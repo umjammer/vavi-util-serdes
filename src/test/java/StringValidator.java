@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * 
  *
- * @author	<a href="mailto:vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
- * @version	0.00	031019	vavi	initial version <br>
+ *
+ * @author    <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
+ * @version    0.00    031019    vavi    initial version <br>
  */
 public class StringValidator extends Validator {
 
@@ -30,7 +30,7 @@ public class StringValidator extends Validator {
     public String getPattern() {
         return pattern.pattern();
     }
-    
+
     /** */
     public boolean validate(String value) {
         Matcher matcher = pattern.matcher(value);

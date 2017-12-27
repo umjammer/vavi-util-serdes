@@ -14,8 +14,8 @@ import java.util.List;
 /**
  * ReaderType.
  *
- * @author	<a href="mailto:vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
- * @version	0.00	031216	vavi	initial version <br>
+ * @author    <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
+ * @version    0.00    031216    vavi    initial version <br>
  */
 public class ReaderType {
 

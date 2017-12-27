@@ -12,8 +12,8 @@ import org.apache.commons.betwixt.io.BeanReader;
 
 /**
  * Binary Binding test.
- * 
- * @author <a href="mailto:vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
+ *
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031215 vavi initial version <br>
  */
 public class t110_1 {

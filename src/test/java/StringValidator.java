@@ -8,11 +8,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+
 /**
  *
  *
- * @author    <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version    0.00    031019    vavi    initial version <br>
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
+ * @version 0.00 031019 vavi initial version <br>
  */
 public class StringValidator extends Validator {
 

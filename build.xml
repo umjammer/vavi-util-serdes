@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- ////////////////////////////////////////////////////////////////////// -->
-<!-- Copyright (c) 2003 by Naohide Sano, All rights reserved.               -->
-<!--                                                                        -->
-<!-- Written by Naohide Sano                                                -->
-<!--                                                                        -->
-<!-- XML Bindings                                                           -->
-<!--                                                                        -->
-<!-- @author Naohide Sano                                                   -->
-<!-- @version 0.00 031008 nsano initial version                             -->
-<!--                                                                        -->
-<!-- ////////////////////////////////////////////////////////////////////// -->
+<!--
+ Copyright (c) 2003 by Naohide Sano, All rights reserved.
+
+ Written by Naohide Sano
+
+ vavi-util-binarybinding
+
+ @author Naohide Sano
+ @version 0.00 031008 nsano initial version
+ -->
 
 <project name="vavi-util-binarybinding" default="run" basedir="."
   xmlns:artifact="urn:maven-artifact-ant">

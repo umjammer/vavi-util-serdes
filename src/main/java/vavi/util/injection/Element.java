@@ -22,17 +22,18 @@ import java.lang.reflect.Field;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Element {
 
-    /** 0 origin */
+    /** 1 origin */
     int sequence();
 
     /**
      * engine
-     * 
+     *
      *  * beanshell
      *
      * prebound
      *
-     *  * $# # is 0, 1, 2 ...
+     *  * $# # is 1, 2, 3 ...
+     *  * $0 is whole data length
      *
      * function
      *
@@ -40,7 +41,7 @@ public @interface Element {
      *  * sizeof(arg) returns size of the arg
      *
      * value
-     * 
+     *
      *  * java primitives
      *
      *  ** default size of java primitives
@@ -53,6 +54,11 @@ public @interface Element {
     String value() default "";
 
     /**
+     * 
+     */
+    String validation() default "";
+
+    /**
      * TODO アノテーションがメソッド指定の場合
      */
     class Util {
@@ -63,13 +69,23 @@ public @interface Element {
         /** */
         public static int getSequence(Field field) {
             Element element = field.getAnnotation(Element.class);
-            return element.sequence();
+            int sequence = element.sequence();
+            if (sequence < 1) {
+                throw new IllegalArgumentException("sequence should be > 0: " + sequence);
+            }
+            return sequence;
         }
 
         /** */
         public static String getValue(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.value();
+        }
+
+        /** */
+        public static String getValidation(Field field) {
+            Element element = field.getAnnotation(Element.class);
+            return element.validation();
         }
     }
 }

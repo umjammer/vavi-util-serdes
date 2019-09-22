@@ -5,15 +5,18 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>vavi</groupId>
   <artifactId>vavi-util-binarybinding</artifactId>
+  <version>0.0.0-SNAPSHOT</version>
+
   <name>Vavi Binary Binding API</name>
   <organization>
     <name></name>
   </organization>
-  <version>1.0.0</version>
   <url>http://www.vavisoft.com/</url>
   <description></description>
+
   <build>
     <plugins>
       <plugin>
@@ -26,23 +29,19 @@
       </plugin>
     </plugins>
   </build>
+
   <repositories>
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
     </repository>
   </repositories>
+
   <dependencies>
     <dependency>
       <groupId>com.github.umjammer</groupId>
       <artifactId>vavi-commons-sandbox</artifactId>
       <version>0.3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-betwixt</groupId>
@@ -53,6 +52,19 @@
       <groupId>org.apache-extras.beanshell</groupId>
       <artifactId>bsh</artifactId>
       <version>2.0b6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.3.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

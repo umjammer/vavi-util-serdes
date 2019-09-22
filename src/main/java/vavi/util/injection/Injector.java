@@ -6,6 +6,7 @@
 
 package vavi.util.injection;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +28,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import vavi.beans.BeanUtil;
+import vavi.io.LittleEndianDataInputStream;
+import vavi.util.StringUtil;
 
 
 /**
  * Injector.
+ *
+ * TODO Factory Injector とか？ カラムを指定する
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031216 vavi initial version <br>
@@ -67,26 +72,22 @@ public @interface Injector {
             return sizeMap.get(arg);
         }
 
-        /**
-         * ストリームから POJO destBean に値をを設定します。
-         */
-        public static void inject(InputStream is, Object destBean) throws IOException {
-
-            Injector optionsAnnotation = destBean.getClass().getAnnotation(Injector.class);
-            if (optionsAnnotation == null) {
-                throw new IllegalArgumentException("bean is not annotated with " + Injector.class.getName());
-            }
-
+        /** */
+        private static List<Field> getElementFields(Object destBean) {
             // 1. list up fields
             List<Field> elementFields = new ArrayList<>();
 
-            for (Field field : destBean.getClass().getDeclaredFields()) {
-                Element elementAnnotation = field.getAnnotation(Element.class);
-                if (elementAnnotation == null) {
-                    continue;
-                }
+            Class<?> clazz = destBean.getClass();
+            while (clazz != null) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    Element elementAnnotation = field.getAnnotation(Element.class);
+                    if (elementAnnotation == null) {
+                        continue;
+                    }
 
-                elementFields.add(field);
+                    elementFields.add(field);
+                }
+                clazz = clazz.getSuperclass();
             }
 
             Collections.sort(elementFields, (o1, o2) -> {
@@ -95,14 +96,44 @@ public @interface Injector {
                 return s1 - s2;
             });
 
+            return elementFields;
+        }
+
+        /** */
+        public static boolean isBigEndian(Object destBean) {
+            Injector injectorAnnotation = destBean.getClass().getAnnotation(Injector.class);
+            if (injectorAnnotation == null) {
+                throw new IllegalArgumentException("bean is not annotated with " + Injector.class.getName());
+            }
+
+            return injectorAnnotation.bigEndian();
+        }
+
+        /**
+         * ストリームから POJO destBean に値をを設定します。
+         */
+        public static void inject(InputStream is, Object destBean) throws IOException {
+
+            Injector injectorAnnotation = destBean.getClass().getAnnotation(Injector.class);
+            if (injectorAnnotation == null) {
+                throw new IllegalArgumentException("bean is not annotated with " + Injector.class.getName());
+            }
+
+            List<Field> elementFields = getElementFields(destBean);
+
             // 2. injection
 try {
-            // TODO use endian
-            DataInputStream dis = new DataInputStream(is);
+            DataInput dis;
+            if (Injector.Util.isBigEndian(destBean)) {
+                dis = new DataInputStream(is);
+            } else {
+                dis = new LittleEndianDataInputStream(is);
+            }
 
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("beanshell");
             Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            bindings.put("$0", is.available()); // "$0" means whole data length
             String prepare = "import static vavi.util.injection.Injector.Util.*;";
             engine.eval(prepare);
 
@@ -112,8 +143,8 @@ try {
                 Object value = null;
                 int size = 0;
                 if (Bound.Util.isBound(field)) {
-                    Binder<?> binder = Bound.Util.getBinder(field);
-                    //defaultBinder.bind(destBean, field, field.getType(), binder.bind(dis), null);
+//                    Binder<?> binder = Bound.Util.getBinder(field);
+//                    defaultBinder.bind(destBean, field, field.getType(), binder.bind(dis), null);
                     throw new UnsupportedOperationException("Binder not supported yet");
                 } else {
                     Class<?> fieldClass = field.getType();
@@ -157,11 +188,11 @@ try {
                         fieldClass = fieldClass.getComponentType();
                         if (fieldClass.equals(Byte.TYPE)) {
                             if (fieldValue != null) {
-                                dis.read(byte[].class.cast(fieldValue), 0, size);
+                                dis.readFully(byte[].class.cast(fieldValue), 0, size);
                                 value = fieldValue;
                             } else {
                                 byte[] buf = new byte[size];
-                                dis.read(buf, 0, size);
+                                dis.readFully(buf, 0, size);
                                 value = buf;
                             }
                         } else {
@@ -171,11 +202,25 @@ try {
                         throw new UnsupportedOperationException("use @Bound");
                     }
                 }
-System.err.println(field.getName() + ": " + field.getType() + (size != 0 ? "[" + size + "]" : "" ) + " = " + value);
-                // field values are stored as "$0", "$1" ...
+System.err.println(field.getName() + ": " + field.getType() + (size != 0 ? "{" + size + "}" : "" ) + " = " + (byte[].class.isInstance(value) ? "\n" + StringUtil.getDump(byte[].class.cast(value)): value));
+                // field values are stored as "$1", "$2" ...
                 bindings.put("$" + sequence, value);
                 // field sizes
                 sizeMap.put(value, size);
+
+                // 2.2. validation
+                String validation = Element.Util.getValidation(field);
+                if (!validation.isEmpty()) {
+                    String validationScript;
+                    if (field.getType().isArray()) {
+                        validationScript = "java.util.Arrays.equals($" + sequence + ", " + validation + ")";
+                    } else {
+                        validationScript = "$" + sequence + ".equals(" + validation + ")";
+                    }
+                    if (!Boolean.valueOf(engine.eval(validationScript).toString())) {
+                        throw new IllegalArgumentException("validation for sequence " + sequence + " failed.\n" + validationScript);
+                    }
+                }
             }
 } catch (ScriptException e) {
     throw new IllegalStateException(e);

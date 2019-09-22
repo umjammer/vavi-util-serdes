@@ -20,15 +20,15 @@ import vavi.util.injection.Injector;
 public class Box {
 
     /** */
-    @Element(sequence = 0, value = "unsigned int")
+    @Element(sequence = 1, value = "unsigned int")
     long offset;
 
     /** */
-    @Element(sequence = 1, value = "4")
+    @Element(sequence = 2 /*, value = "4" */) // value is optional
     byte[] id = new byte[4];
 
     /** */
-    @Element(sequence = 2, value = "$0 - sizeof($0) - len($1)")
+    @Element(sequence = 3, value = "$1 - sizeof($1) - len($2)")
     byte[] data;
 }
 

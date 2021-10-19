@@ -5,3 +5,4 @@
  * Validator は abstract にしてあるからエラー
  * Binary Binding
  * Text Binding
+ * http://kaitai.io/

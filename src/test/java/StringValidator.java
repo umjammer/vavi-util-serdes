@@ -10,7 +10,7 @@ import java.util.regex.PatternSyntaxException;
 
 
 /**
- *
+ * StringValidator.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031019 vavi initial version <br>
@@ -21,7 +21,7 @@ public class StringValidator extends Validator {
     private Pattern pattern;
 
     /**
-     * @param regex マッチングさせる正規表現
+     * @param regex regex for match
      */
     public void setPattern(String regex) throws PatternSyntaxException {
         this.pattern = Pattern.compile(regex);

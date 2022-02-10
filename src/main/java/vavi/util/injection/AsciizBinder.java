@@ -6,7 +6,9 @@
 
 package vavi.util.injection;
 
-import java.io.DataInputStream;
+import java.lang.reflect.Field;
+
+import vavi.beans.Binder;
 
 
 /**
@@ -15,15 +17,14 @@ import java.io.DataInputStream;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031216 vavi initial version <br>
  */
-public class AsciizBinder implements Binder<String> {
+public class AsciizBinder implements Binder {
 
-    /* @see vavi.util.injection.Binder#inject() */
-    @Override
-    public String bind(DataInputStream dis) {
+    /**
+     * Sets the value to the destBean's field.
+     */
+    public void bind(Object destBean, Field field, Class<?> fieldClass, String value, Object elseValue) {
         // TODO Auto-generated method stub
-        return null;
     }
-
 }
 
 /* */

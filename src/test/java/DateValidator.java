@@ -13,18 +13,18 @@ import java.util.Set;
 
 
 /**
- * 
- * 
+ * DateValidator.
+ *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031019 vavi initial version <br>
  */
 public class DateValidator extends Validator {
 
-    /** {@link DateFormat} で使用されるフォーマットの文字列のコレクション。 */
+    /** collection of format strings using with {@link DateFormat} */
     private Set<String> formats = new HashSet<>();
 
     /**
-     * @param format {@link DateFormat} で使用されるフォーマットの文字列
+     * @param format using with {@link DateFormat}
      */
     public void addFormat(String format) {
         this.formats.add(format);

@@ -11,6 +11,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 
+import vavi.beans.Binder;
+
 
 /**
  * Bound.
@@ -23,10 +25,10 @@ import java.lang.reflect.Field;
 public @interface Bound {
 
     /** */
-    Class<? extends Binder<?>> binder();
+    Class<? extends Binder> binder();
 
     /**
-     * TODO アノテーションがメソッド指定の場合
+     * TODO for method annotation
      */
     class Util {
 
@@ -43,11 +45,10 @@ public @interface Bound {
          * @param field @{@link Bound} annotated field.
          * @throws NullPointerException when field is not annotated by {@link Bound}
          */
-        public static <T> Binder<T> getBinder(Field field) {
+        public static Binder getBinder(Field field) {
             try {
                 Bound bound = field.getAnnotation(Bound.class);
-                @SuppressWarnings("unchecked")
-                Binder<T> binder = (Binder<T>) bound.binder().getDeclaredConstructor().newInstance();
+                Binder binder = (Binder) bound.binder().getDeclaredConstructor().newInstance();
                 return binder;
             } catch (Exception e) {
                 throw new IllegalStateException(e);

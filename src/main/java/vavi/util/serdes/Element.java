@@ -4,7 +4,7 @@
  * Programmed by Naohide Sano
  */
 
-package vavi.util.injection;
+package vavi.util.serdes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,7 +15,8 @@ import java.lang.reflect.Field;
 /**
  * Element.
  * <p>
- * {@link Injector.Util} class's `inject` method search super classes' methods annotated with {@link Element}
+ * {@link Serdes.Util#deserialize(java.nio.channels.SeekableByteChannel, Object)} method
+ * searches super classes' methods annotated with {@link Element}
  * </p>
  * TODO validation message
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
@@ -62,7 +63,7 @@ public @interface Element {
     String value() default "";
 
     /**
-     * default is follow parent @Injector
+     * default is follow parent @Serdes
      * <p>
      * we need the 3rd value that means default (follow global setting),
      * but boolean takes only 2value (true/false). so we make this type as Boolean,

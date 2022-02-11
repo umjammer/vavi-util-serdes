@@ -4,7 +4,7 @@
  * Programmed by Naohide Sano
  */
 
-package vavi.util.injection;
+package vavi.util.serdes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -8,13 +8,13 @@
 
   <groupId>vavi</groupId>
   <artifactId>vavi-util-binaryio</artifactId>
-  <version>0.0.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <name>Vavi Binary Binding API</name>
   <organization>
-    <name></name>
+    <name>vavi</name>
   </organization>
-  <url>http://www.vavisoft.com/</url>
+  <url>http://github.com/umjammer/vavi-util-binaryio</url>
   <description></description>
 
   <build>

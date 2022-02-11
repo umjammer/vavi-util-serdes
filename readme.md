@@ -56,3 +56,4 @@
  * ~~Binary Binding~~
  * Text Binding
  * validation engine -> "spi" or "method" like condition
+ * incredibly slow, it's not sufficient performance for huge repetition (i.e. filesystem has a huge amount of files)

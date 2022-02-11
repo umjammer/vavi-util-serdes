@@ -4,12 +4,13 @@
  * Programmed by Naohide Sano
  */
 
-package vavi.util.injection;
+package vavi.util.serdes;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,20 +42,21 @@ import vavi.util.StringUtil;
 
 
 /**
- * Injector represents a fields of POJO annotated with {@link Element} are automatically injected
- * values by the {@link Injector.Util} utility class. not only "injection" but this system has
+ * Serdes represents a fields of POJO annotated with {@link Element} are automatically injected
+ * values by the {@link Serdes.Util} utility class. not only "injection" but this system has
  * "conditioning injection", "field value validation" also.
  * <p>
- * {@link Injector.Util} class's `inject` method search super classes annotated with {@link Injector}
+ * {@link Serdes.Util#deserialize(SeekableByteChannel, Object)} method searches
+ * super classes annotated with {@link Serdes}
  * </p>
- * TODO how about Factory Injector? specify column
+ * TODO how about Factory Serdes? specify column
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 031216 vavi initial version <br>
  */
 @java.lang.annotation.Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Injector {
+public @interface Serdes {
 
     /** default is system encoding */
     String encoding() default "";
@@ -63,7 +65,7 @@ public @interface Injector {
     boolean bigEndian() default true;
 
     /**
-     * utility for injection.
+     * utility for serialize/deserialize.
      */
     class Util {
 
@@ -115,25 +117,25 @@ public @interface Injector {
 
         /**
          * search super classes recursively
-         * @throws IllegalArgumentException bean is not annotated with {@link Injector}
+         * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
-        private static Injector getAnnotation(Object destBean) {
+        private static Serdes getAnnotation(Object destBean) {
             Class<?> clazz = destBean.getClass();
             while (clazz != null) {
-                Injector injectorAnnotation = clazz.getAnnotation(Injector.class);
-                if (injectorAnnotation != null) {
-                    return injectorAnnotation;
+                Serdes serdesAnnotation = clazz.getAnnotation(Serdes.class);
+                if (serdesAnnotation != null) {
+                    return serdesAnnotation;
                 }
                 clazz = clazz.getSuperclass();
             }
-            throw new IllegalArgumentException("bean is not annotated with " + Injector.class.getName());
+            throw new IllegalArgumentException("bean is not annotated with " + Serdes.class.getName());
         }
 
         /** */
         public static boolean isBigEndian(Object destBean) {
-            Injector injectorAnnotation = getAnnotation(destBean);
+            Serdes serdesAnnotation = getAnnotation(destBean);
 
-            return injectorAnnotation.bigEndian();
+            return serdesAnnotation.bigEndian();
         }
 
         private static class InputSource {
@@ -152,12 +154,12 @@ public @interface Injector {
         /**
          * Injects data into a POJO destBean from stream.
          */
-        public static void inject(InputStream is, Object destBean) throws IOException {
+        public static void deserialize(InputStream is, Object destBean) throws IOException {
             InputSource in = new InputSource();
             in.bedis = new DataInputStream(is);
             in.ledis = new LittleEndianDataInputStream(is);
             in.available = is.available();
-            inject(in, destBean);
+            deserialize(in, destBean);
         }
 
         /**
@@ -166,15 +168,15 @@ public @interface Injector {
          * @throws IllegalArgumentException thrown by validation failure
          * @throws IllegalStateException might be thrown by wrong annotation settings
          */
-        public static void inject(SeekableByteChannel sbc, Object destBean) throws IOException {
+        public static void deserialize(SeekableByteChannel sbc, Object destBean) throws IOException {
             InputSource in = new InputSource();
             in.bedis = new SeekableDataInputStream(sbc);
             in.ledis = new LittleEndianSeekableDataInputStream(sbc);
             in.available = (int) (sbc.size() - sbc.position());
-            inject(in, destBean);
+            deserialize(in, destBean);
         }
 
-        private static void inject(InputSource in, Object destBean) throws IOException {
+        private static void deserialize(InputSource in, Object destBean) throws IOException {
             getAnnotation(destBean);
 
             // 1. list up fields
@@ -182,13 +184,13 @@ public @interface Injector {
 
             // 2. injection
 try {
-            in.setDefault(Injector.Util.isBigEndian(destBean));
+            in.setDefault(Serdes.Util.isBigEndian(destBean));
 
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("beanshell");
             Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
             bindings.put("$0", in.available); // "$0" means whole data length
-            String prepare = "import static vavi.util.injection.Injector.Util.*;";
+            String prepare = "import static vavi.util.serdes.Serdes.Util.*;";
             engine.eval(prepare);
 
             for (Field field : elementFields) {
@@ -286,11 +288,25 @@ Debug.println(Level.FINE, "condition check is false");
                                 dis.readFully(buf, 0, size);
                                 value = buf;
                             }
+                        } else if (fieldClass.equals(Integer.TYPE)) {
+                            // int array
+                            if (fieldValue != null) {
+                                for (int i = 0; i < size; i++) {
+                                    int[].class.cast(fieldValue)[i] = dis.readInt();
+                                }
+                                value = fieldValue;
+                            } else {
+                                int[] buf = new int[size];
+                                for (int i = 0; i < size; i++) {
+                                    buf[i] = dis.readInt();
+                                }
+                                value = buf;
+                            }
                         } else {
                             // object array
-                            Injector annotation = fieldClass.getAnnotation(Injector.class);
+                            Serdes annotation = fieldClass.getAnnotation(Serdes.class);
                             if (annotation == null) {
-                                throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "]");
+                                throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + sequence + ")");
                             }
                             try {
                                 if (fieldValue != null) {
@@ -298,7 +314,7 @@ Debug.println(Level.FINE, "condition check is false");
                                 }
                                 for (int i = 0; i < size; i++) {
                                     Object fieldBean = fieldClass.newInstance();
-                                    inject(in, fieldBean);
+                                    deserialize(in, fieldBean);
                                     Array.set(fieldValue, i, fieldBean);
                                 }
                                 value = fieldValue;
@@ -319,17 +335,17 @@ Debug.println(Level.FINE, "condition check is false");
                         dis.readFully(bytes);
                         value = new String(bytes);
                    } else {
-                       // nested user defined class object annotated @Injector
-                       Injector annotation = fieldClass.getAnnotation(Injector.class);
+                       // nested user defined class object annotated @Serdes
+                       Serdes annotation = fieldClass.getAnnotation(Serdes.class);
                        if (annotation == null) {
-                           throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "]");
+                           throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + sequence + ")");
                        }
                        try {
                            Object fieldValue = BeanUtil.getFieldValue(field, destBean);
                            if (fieldValue == null) {
                                fieldValue = fieldClass.newInstance();
                            }
-                           inject(in, fieldValue);
+                           deserialize(in, fieldValue);
                            value = fieldValue;
                        } catch (InstantiationException | IllegalAccessException e) {
                            throw new IllegalStateException(e);
@@ -362,6 +378,14 @@ Debug.println(Level.FINE, field.getName() + ": " + field.getType() + (size != 0 
 } catch (ScriptException e) {
     throw new IllegalStateException(e);
 }
+        }
+
+        public static void serialize(Object srcBean, SeekableByteChannel sbc) throws IOException {
+            throw new UnsupportedOperationException("noy implemented yet");
+        }
+
+        public static void serialize(Object srcBean, OutputStream sbc) throws IOException {
+            throw new UnsupportedOperationException("noy implemented yet");
         }
     }
 }

@@ -4,7 +4,7 @@
  * Programmed by Naohide Sano
  */
 
-package vavi.util.injection;
+package vavi.util.serdes;
 
 import java.lang.reflect.Field;
 

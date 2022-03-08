@@ -27,38 +27,14 @@ import java.lang.reflect.Field;
 public @interface Element {
 
     /**
-     * 1 origin
-     * TODO sub classes has same number
+     * depends {@link BeanBinder}.
+     * @see DefaultBeanBinder
      */
-    int sequence();
+    int sequence() default 0;
 
     /**
-     * <pre>
-     * engine
-     *
-     *  * beanshell
-     *
-     * prebound
-     *
-     *  * $# # is 1, 2, 3 ...
-     *  * $0 is whole data length
-     *
-     * function
-     *
-     *  * len(arg) returns length of the array arg
-     *  * sizeof(arg) returns size of the arg
-     *
-     * value
-     *
-     *  * java primitives
-     *
-     *  ** default size of java primitives
-     *  ** "unsigned int" unsigned 32 bit
-     *
-     * * array
-     *
-     *  ** value length of the array
-     * </pre>
+     * depends {@link BeanBinder}.
+     * @see DefaultBinder
      */
     String value() default "";
 
@@ -72,26 +48,20 @@ public @interface Element {
     String bigEndian() default "";
 
     /**
-     * method name, signature is "method_name(I)B"
+     * depends {@link BeanBinder}.
+     * @see DefaultBeanBinder.DefaultEachContext#condition(String)
      */
     String condition() default "";
 
     /**
-     * beanshell script that used in equals method
-     * <pre>
-     * for normal fields
-     *
-     *  $2.equals(eval("validation script"));
-     *
-     * for array fields
-     *
-     *  Arrays.equals($3, eval("validation script"));
-     *
-     * </pre>
-     * TODO scripting more freely? (user writes equals, then eval is like assertTrue)
+     * depends {@link BeanBinder}.
+     * @see DefaultBeanBinder.DefaultEachContext#validate(String)
      * @see #value()
      */
     String validation() default "";
+
+    /** encoding */
+    String encoding() default "";
 
     /**
      * TODO annotation for method
@@ -105,9 +75,6 @@ public @interface Element {
         public static int getSequence(Field field) {
             Element element = field.getAnnotation(Element.class);
             int sequence = element.sequence();
-            if (sequence < 1) {
-                throw new IllegalArgumentException("sequence should be > 0: " + sequence);
-            }
             return sequence;
         }
 
@@ -133,6 +100,12 @@ public @interface Element {
         public static String getCondition(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.condition();
+        }
+
+        /** see {@link Element#encoding()} */
+        public static String getEncoding(Field field) {
+            Element element = field.getAnnotation(Element.class);
+            return element.encoding();
         }
     }
 }

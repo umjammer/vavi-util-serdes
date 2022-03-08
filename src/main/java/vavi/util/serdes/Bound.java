@@ -11,8 +11,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 
-import vavi.beans.Binder;
-
 
 /**
  * Bound.
@@ -30,7 +28,7 @@ public @interface Bound {
     /**
      * TODO for method annotation
      */
-    class Util {
+    final class Util {
 
         private Util() {
         }
@@ -48,8 +46,7 @@ public @interface Bound {
         public static Binder getBinder(Field field) {
             try {
                 Bound bound = field.getAnnotation(Bound.class);
-                Binder binder = (Binder) bound.binder().getDeclaredConstructor().newInstance();
-                return binder;
+                return bound.binder().getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

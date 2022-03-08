@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.logging.Level;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import vavi.test.box.Box;
@@ -224,7 +225,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     static class Test9 {
         @Element(sequence = 1, value = "9")
         int[] ia1;
-        @Element(sequence = 1)
+        @Element(sequence = 2)
         int[] ia2 = new int[5];
     }
 
@@ -241,6 +242,67 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5, 6 ,7, 8 }, test.ia1);
         assertArrayEquals(new int[] { 9, 10, 11, 12, 13 }, test.ia2);
     }
+
+    @Serdes
+    static class Test10 {
+        @Element(sequence = 0)
+        int i1;
+    }
+
+    @Test
+    @DisplayName("non natural number sequence")
+    void test10() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(10));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test10 test = new Test10();
+        assertThrows(IllegalArgumentException.class, () -> {
+            Serdes.Util.deserialize(is, test);
+        });
+    }
+
+    @Serdes
+    static class Test11 {
+        @Element(sequence = 1)
+        int i1;
+        @Element(sequence = 1)
+        int i2;
+    }
+
+    @Test
+    @DisplayName("duplicate sequence")
+    void test11() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(11));
+        baos.write(ByteUtil.getBeBytes(11));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test11 test = new Test11();
+        assertThrows(IllegalArgumentException.class, () -> {
+            Serdes.Util.deserialize(is, test);
+        });
+    }
+
+    @Serdes
+    static class Test12 {
+        @Element
+        int i1;
+    }
+
+    @Test
+    @DisplayName("w/o sequence for default beanBinder")
+    void test12() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(10));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test12 test = new Test12();
+        assertThrows(IllegalArgumentException.class, () -> {
+            Serdes.Util.deserialize(is, test);
+        });
+    }
+
 }
 
 /* */

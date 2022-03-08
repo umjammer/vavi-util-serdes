@@ -7,14 +7,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>vavi</groupId>
-  <artifactId>vavi-util-binarybinding</artifactId>
-  <version>0.0.0-SNAPSHOT</version>
+  <artifactId>vavi-util-serdes</artifactId>
+  <version>1.0.0</version>
 
   <name>Vavi Binary Binding API</name>
   <organization>
-    <name></name>
+    <name>vavi</name>
   </organization>
-  <url>http://www.vavisoft.com/</url>
+  <url>http://github.com/umjammer/vavi-util-serdes</url>
   <description></description>
 
   <build>
@@ -27,6 +27,16 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+        <configuration>
+          <argLine>
+            -Djava.util.logging.config.file=${project.build.testOutputDirectory}/logging.properties
+          </argLine>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -37,16 +47,23 @@
     </repository>
   </repositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.8.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>com.github.umjammer</groupId>
-      <artifactId>vavi-commons-sandbox</artifactId>
-      <version>0.3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-betwixt</groupId>
-      <artifactId>commons-betwixt</artifactId>
-      <version>0.8</version>
+      <artifactId>vavi-commons</artifactId>
+      <version>1.1.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache-extras.beanshell</groupId>
@@ -57,13 +74,18 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.3.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.3.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-betwixt</groupId>
+      <artifactId>commons-betwixt</artifactId>
+      <version>0.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

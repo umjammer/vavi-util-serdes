@@ -4,7 +4,7 @@
  * Programmed by Naohide Sano
  */
 
-package vavi.util.injection;
+package vavi.util.serdes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,12 +23,12 @@ import java.lang.reflect.Field;
 public @interface Bound {
 
     /** */
-    Class<? extends Binder<?>> binder();
+    Class<? extends Binder> binder();
 
     /**
-     * TODO アノテーションがメソッド指定の場合
+     * TODO for method annotation
      */
-    class Util {
+    final class Util {
 
         private Util() {
         }
@@ -43,12 +43,10 @@ public @interface Bound {
          * @param field @{@link Bound} annotated field.
          * @throws NullPointerException when field is not annotated by {@link Bound}
          */
-        public static <T> Binder<T> getBinder(Field field) {
+        public static Binder getBinder(Field field) {
             try {
                 Bound bound = field.getAnnotation(Bound.class);
-                @SuppressWarnings("unchecked")
-                Binder<T> binder = (Binder<T>) bound.binder().getDeclaredConstructor().newInstance();
-                return binder;
+                return bound.binder().getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

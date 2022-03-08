@@ -6,8 +6,8 @@
 
 package vavi.test.box;
 
-import vavi.util.injection.Element;
-import vavi.util.injection.Injector;
+import vavi.util.serdes.Element;
+import vavi.util.serdes.Serdes;
 
 
 /**
@@ -16,7 +16,7 @@ import vavi.util.injection.Injector;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2019/04/05 umjammer initial version <br>
  */
-@Injector
+@Serdes
 public class Box {
 
     /** */

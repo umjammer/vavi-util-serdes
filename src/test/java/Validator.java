@@ -4,11 +4,12 @@
  * Programmed by Naohide Sano
  */
 
+
 /**
+ * Validator.
  *
- *
- * @author    <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version    0.00    031019    vavi    initial version <br>
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
+ * @version 0.00 031019 vavi initial version <br>
  */
 public abstract class Validator {
 

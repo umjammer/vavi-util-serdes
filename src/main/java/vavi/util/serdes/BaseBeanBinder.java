@@ -40,9 +40,10 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
 
 
     @Override
-    public void deserialize(Object io, Object destBean) throws IOException {
+    public Object deserialize(Object io, Object destBean) throws IOException {
         T in = getIOSource(io, Serdes.Util.isBigEndian(destBean));
         deserialize0(in, destBean);
+        return destBean;
     }
 
     /**
@@ -98,7 +99,7 @@ Debug.println(Level.FINE, field.getName() + ": " + field.getType() + eachContext
     }
 
     @Override
-    public void serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object destBean, Object io) throws IOException {
         throw new UnsupportedOperationException("not implemented yet");
     }
 

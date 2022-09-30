@@ -65,7 +65,7 @@ public class DefaultBinder implements Binder {
     // Integer
     protected EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
             if (type.equalsIgnoreCase("unsigned byte")) {
                 context.setValue(eachContext.dis.readUnsignedByte());
@@ -83,7 +83,7 @@ public class DefaultBinder implements Binder {
     // Short
     protected EachBinder shortEachBinder = new Binder.ShortEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readShort());
             eachContext.size = 2;
         }
@@ -92,7 +92,7 @@ public class DefaultBinder implements Binder {
     // Byte
     protected EachBinder byteEachBinder = new Binder.ByteEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readByte());
             eachContext.size = 1;
         }
@@ -102,9 +102,9 @@ public class DefaultBinder implements Binder {
     protected EachBinder longEachBinder = new Binder.LongEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String type = Element.Util.getValue(field);
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             if (type.equalsIgnoreCase("unsigned int")) {
-                context.setValue(eachContext.dis.readInt() & 0xffffffffl);
+                context.setValue(eachContext.dis.readInt() & 0xffffffffL);
                 eachContext.size = 4;
             } else {
                 context.setValue(eachContext.dis.readLong());
@@ -138,7 +138,7 @@ public class DefaultBinder implements Binder {
     protected EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             // Array
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             Object fieldValue = BeanUtil.getFieldValue(field, destBean);
             if (fieldValue != null) {
                 eachContext.size = Array.getLength(fieldValue);
@@ -153,7 +153,7 @@ public class DefaultBinder implements Binder {
             if (fieldElementClass.equals(Byte.TYPE)) {
                 // byte array
                 if (fieldValue != null) {
-                    eachContext.dis.readFully(byte[].class.cast(fieldValue), 0, eachContext.size);
+                    eachContext.dis.readFully((byte[]) fieldValue, 0, eachContext.size);
                     context.setValue(fieldValue);
                 } else {
                     byte[] buf = new byte[eachContext.size];
@@ -164,7 +164,7 @@ public class DefaultBinder implements Binder {
                 // int array
                 if (fieldValue != null) {
                     for (int i = 0; i < eachContext.size; i++) {
-                        int[].class.cast(fieldValue)[i] = eachContext.dis.readInt();
+                        ((int[]) fieldValue)[i] = eachContext.dis.readInt();
                     }
                     context.setValue(fieldValue);
                 } else {
@@ -200,7 +200,7 @@ public class DefaultBinder implements Binder {
     // String
     protected EachBinder stringEachBinder = new Binder.StringEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = DefaultEachContext.class.cast(context);
+            DefaultEachContext eachContext = (DefaultEachContext) context;
             String sizeScript = Element.Util.getValue(field);
 //Debug.println(sizeScript);
             if (!sizeScript.isEmpty()) {
@@ -215,7 +215,7 @@ public class DefaultBinder implements Binder {
     };
 
     /** */
-    private EachBinder[] eachBinders = {
+    private final EachBinder[] eachBinders = {
         booleanEachBinder,
         integerEachBinder,
         shortEachBinder,

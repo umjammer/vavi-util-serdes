@@ -52,12 +52,12 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     public DefaultIOSource getIOSource(Object... args) throws IOException {
         DefaultIOSource in = new DefaultIOSource();
         if (args[0] instanceof InputStream) {
-            InputStream is = InputStream.class.cast(args[0]);
+            InputStream is = (InputStream) args[0];
             in.bedis = new DataInputStream(is);
             in.ledis = new LittleEndianDataInputStream(is);
             in.available = is.available();
         } else if (args[0] instanceof SeekableByteChannel) {
-            SeekableByteChannel sbc = SeekableByteChannel.class.cast(args[0]);
+            SeekableByteChannel sbc = (SeekableByteChannel) args[0];
             in.bedis = new SeekableDataInputStream(sbc);
             in.ledis = new LittleEndianSeekableDataInputStream(sbc);
             in.available = (int) (sbc.size() - sbc.position());
@@ -91,7 +91,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         DefaultBeanBinder beanBinder;
 
         DefaultContext(IOSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
-            this.in = DefaultIOSource.class.cast(in);
+            this.in = (DefaultIOSource) in;
             this.fields = fields;
             this.bean = bean;
             this.beanBinder = beanBinder;
@@ -108,7 +108,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         /** for script */
-        private static Map<Object, Integer> sizeMap = new HashMap<>();
+        private static final Map<Object, Integer> sizeMap = new HashMap<>();
 
         /** a function for script */
         public static int sizeof(Object arg) {

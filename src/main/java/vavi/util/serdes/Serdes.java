@@ -123,17 +123,19 @@ public @interface Serdes {
          * @throws IllegalArgumentException thrown by validation failure
          * @throws IllegalStateException might be thrown by wrong annotation settings
          */
-        public static void deserialize(Object in, Object destBean) throws IOException {
+        @SuppressWarnings("unchecked")
+        public static <T> T deserialize(Object in, T destBean) throws IOException {
             BeanBinder<? extends BeanBinder.IOSource> binders = getBeanBinder(destBean);
-            binders.deserialize(in, destBean);
+            return (T) binders.deserialize(in, destBean);
         }
 
         /**
          * Serializes data from a POJO srcBean to out.
          */
-        public static void serialize(Object srcBean, Object out) throws IOException {
+        @SuppressWarnings("unchecked")
+        public static <T> T serialize(Object srcBean, T out) throws IOException {
             BeanBinder<? extends BeanBinder.IOSource> binders = getBeanBinder(srcBean);
-            binders.serialize(srcBean, out);
+            return (T) binders.serialize(srcBean, out);
         }
     }
 }

@@ -1,6 +1,14 @@
+[![](https://jitpack.io/v/umjammer/vavi-util-serdes.svg)](https://jitpack.io/#umjammer/vavi-util-serdes)
+[![CodeQL](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml)
+![Java](https://img.shields.io/badge/Java-8-b07219)
+
 # vavi-util-serdes
 
 🌏 serialize/deserialize the world!
+
+## Install
+
+ * [jitpack](https://jitpack.io/#umjammer/vavi-util-serdes)
 
 ## How To
 
@@ -10,7 +18,7 @@
     @Serdes(bigEndian = false)
     public class NHDHeader {
         /** signature "T98HDDIMAGE.R0" */
-        @Element(sequence = 1, validation = "new byte[] { 0x84, 0x57, 0x56, 0x72, 0x68, 0x68, 0x73, 0x77, 0x65, 0x71, 0x69, 0x46, 0x82, 0x48, 0, 0 })
+        @Element(sequence = 1, validation = "new byte[] { 0x84, 0x57, 0x56, 0x72, 0x68, 0x68, 0x73, 0x77, 0x65, 0x71, 0x69, 0x46, 0x82, 0x48, 0, 0 }")
         byte[] sig = new byte[16];
         @Element(sequence = 2, value = "0x100")
         String comment;
@@ -31,7 +39,7 @@
 
  * read
 
-```java
+```jshelllanguage
     InputStream is = Files.newInputStream(Paths.get("/home/me/games/pc98/my.nhd"));
     NHDHeader header = new NHDHeader();
     Serdes.Util.deserialize(is, header);
@@ -73,6 +81,11 @@
  * Text Binding
  * validation engine -> "spi" or "method" like *condition*
  * appallingly slow, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
- * enable to set sub class BeanBinder (currently uses the same BeanBinder of the super class)
- * toString bean binder? (inside is apache commons?)
+ * enable subclass to set BeanBinder (currently uses the same BeanBinder of the super class)
+ * toString bean binder? (implementation is apache commons?)
  * [MessagePack](https://github.com/msgpack/msgpack-java), [protobuf](https://github.com/protocolbuffers/protobuf/tree/master/java)
+ * annotation translator
+   * e.g. Jackson's `@JsonProperty` -> my `@Target`
+ * xml
+   * [simple](http://simple.sourceforge.net/home.php)
+   * [jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)

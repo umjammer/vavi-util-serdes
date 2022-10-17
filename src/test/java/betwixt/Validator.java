@@ -4,12 +4,13 @@
  * Programmed by Naohide Sano
  */
 
+package betwixt;
 
 /**
  * Validator.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version 0.00 031019 vavi initial version <br>
+ * @version 0.00 031019 nsano initial version <br>
  */
 public abstract class Validator {
 

@@ -4,6 +4,8 @@
  * Programmed by Naohide Sano
  */
 
+package betwixt;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -13,7 +15,7 @@ import java.util.regex.PatternSyntaxException;
  * StringValidator.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version 0.00 031019 vavi initial version <br>
+ * @version 0.00 031019 nsano initial version <br>
  */
 public class StringValidator extends Validator {
 

@@ -4,6 +4,8 @@
  * Programmed by Naohide Sano
  */
 
+package betwixt;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,7 +18,7 @@ import java.util.Set;
  * DateValidator.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version 0.00 031019 vavi initial version <br>
+ * @version 0.00 031019 nsano initial version <br>
  */
 public class DateValidator extends Validator {
 

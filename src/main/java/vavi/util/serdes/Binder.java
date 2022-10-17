@@ -97,6 +97,13 @@ public interface Binder {
         }
     }
 
+    // Enum
+    abstract class EnumEachBinder implements EachBinder {
+        @Override public boolean matches(Class<?> fieldClass) {
+            return fieldClass.isEnum();
+        }
+    }
+
     /** nested user defined class object annotated {@link Serdes} */
     EachBinder defaultEachBinder = new EachBinder() {
         @Override public boolean matches(Class<?> fieldClass) {

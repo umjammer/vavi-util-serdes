@@ -8,9 +8,17 @@ package vavi.util.serdes;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 
 import vavi.beans.BeanUtil;
+import vavi.beans.ClassUtil;
+import vavi.util.Debug;
 import vavi.util.serdes.DefaultBeanBinder.DefaultEachContext;
 
 
@@ -58,11 +66,31 @@ public class DefaultBinder implements Binder {
     // Boolean
     protected EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            throw new UnsupportedOperationException("boolean");
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readBoolean());
+            eachContext.size = 1;
         }
     };
 
-    // Integer
+    // Byte
+    protected EachBinder byteEachBinder = new Binder.ByteEachBinder() {
+        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readByte());
+            eachContext.size = 1;
+        }
+    };
+
+    // Short
+    protected EachBinder shortEachBinder = new Binder.ShortEachBinder() {
+        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readShort());
+            eachContext.size = 2;
+        }
+    };
+
+    // Integer, value=type ("unsigned byte"|"unsigned short"|empty)
     protected EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
@@ -80,31 +108,13 @@ public class DefaultBinder implements Binder {
         }
     };
 
-    // Short
-    protected EachBinder shortEachBinder = new Binder.ShortEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = (DefaultEachContext) context;
-            context.setValue(eachContext.dis.readShort());
-            eachContext.size = 2;
-        }
-    };
-
-    // Byte
-    protected EachBinder byteEachBinder = new Binder.ByteEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            DefaultEachContext eachContext = (DefaultEachContext) context;
-            context.setValue(eachContext.dis.readByte());
-            eachContext.size = 1;
-        }
-    };
-
-    // Long
+    // Long, value=type ("unsigned int"|empty)
     protected EachBinder longEachBinder = new Binder.LongEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String type = Element.Util.getValue(field);
             DefaultEachContext eachContext = (DefaultEachContext) context;
             if (type.equalsIgnoreCase("unsigned int")) {
-                context.setValue(eachContext.dis.readInt() & 0xffffffffL);
+                context.setValue(eachContext.dis.readInt() & 0xffff_ffffL);
                 eachContext.size = 4;
             } else {
                 context.setValue(eachContext.dis.readLong());
@@ -116,21 +126,27 @@ public class DefaultBinder implements Binder {
     // Float
     protected EachBinder floatEachBinder = new Binder.FloatEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            throw new UnsupportedOperationException("float");
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readFloat());
+            eachContext.size = 4;
         }
     };
 
     // Double
     protected EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            throw new UnsupportedOperationException("double");
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readDouble());
+            eachContext.size = 8;
         }
     };
 
     // Character
     protected EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            throw new UnsupportedOperationException("char");
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            context.setValue(eachContext.dis.readChar());
+            eachContext.size = 2;
         }
     };
 
@@ -159,6 +175,20 @@ Debug.println(Level.FINER, sizeScript);
                     eachContext.dis.readFully(buf, 0, eachContext.size);
                     context.setValue(buf);
                 }
+            } else if (fieldElementClass.equals(Short.TYPE)) {
+                // short array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        ((short[]) fieldValue)[i] = eachContext.dis.readShort();
+                    }
+                    context.setValue(fieldValue);
+                } else {
+                    short[] buf = new short[eachContext.size];
+                    for (int i = 0; i < eachContext.size; i++) {
+                        buf[i] = eachContext.dis.readShort();
+                    }
+                    context.setValue(buf);
+                }
             } else if (fieldElementClass.equals(Integer.TYPE)) {
                 // int array
                 if (fieldValue != null) {
@@ -170,6 +200,20 @@ Debug.println(Level.FINER, sizeScript);
                     int[] buf = new int[eachContext.size];
                     for (int i = 0; i < eachContext.size; i++) {
                         buf[i] = eachContext.dis.readInt();
+                    }
+                    context.setValue(buf);
+                }
+            } else if (fieldElementClass.equals(Long.TYPE)) {
+                // long array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        ((long[]) fieldValue)[i] = eachContext.dis.readLong();
+                    }
+                    context.setValue(fieldValue);
+                } else {
+                    long[] buf = new long[eachContext.size];
+                    for (int i = 0; i < eachContext.size; i++) {
+                        buf[i] = eachContext.dis.readLong();
                     }
                     context.setValue(buf);
                 }
@@ -213,6 +257,140 @@ Debug.println(Level.FINER, sizeScript);
         }
     };
 
+    /** @throws IllegalArgumentException when type is not proper value */
+    private Object read(DefaultEachContext eachContext, String type) throws IOException {
+        if (type.equalsIgnoreCase("byte")) {
+            eachContext.size = 1;
+            return eachContext.dis.readByte();
+        } else if (type.equalsIgnoreCase("unsigned byte")) {
+            eachContext.size = 1;
+            return eachContext.dis.readUnsignedByte();
+        } else if (type.equalsIgnoreCase("short")) {
+            eachContext.size = 2;
+            return eachContext.dis.readShort();
+        } else if (type.equalsIgnoreCase("unsigned short")) {
+            eachContext.size = 2;
+            return eachContext.dis.readUnsignedShort();
+        } else if (type.equalsIgnoreCase("int")) {
+            eachContext.size = 4;
+            return eachContext.dis.readInt();
+        } else if (type.equalsIgnoreCase("unsigned int")) {
+            eachContext.size = 4;
+            return eachContext.dis.readInt() & 0xffff_ffffL;
+        } else if (type.equalsIgnoreCase("long")) {
+            eachContext.size = 8;
+            return eachContext.dis.readLong();
+        } else {
+            throw new IllegalArgumentException(type);
+        }
+    }
+
+    /**
+     * Gets one of enum member.
+     * @return Arrays.stream(enumType.values()).filter(p).findFirst().get();
+     * @throws java.util.NoSuchElementException when not found
+     */
+    private Enum<?> getEnum(Class<?> enumType, Predicate<Enum<?>> p) {
+        try {
+            // TODO "values()" is implementation specific?
+            Method method = enumType.getDeclaredMethod("values");
+Debug.println(Level.FINER, "getEnum: " + Arrays.toString((Enum<?>[]) method.invoke(null)));
+            return Arrays.stream((Enum<?>[]) method.invoke(null)).filter(p).findFirst().get();
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Gets enum value by method "methodName".
+     * @return enumType.enumObject.methodName() e.g. EnumX.MEMBER_1.getValue()
+     * @throws IllegalStateException cannot get
+     */
+    private Object invokeValueMethod(Class<?> enumType, Object enumObject, String methodName) {
+Debug.println(Level.FINER, "invokeValueMethod: " + enumType + ", " + enumObject + ", " + methodName);
+        try {
+            Method method = enumType.getDeclaredMethod(methodName);
+            return method.invoke(enumObject);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    // Enum, value=type ("int"|"unsigned byte"|...)
+    protected EachBinder enumEachBinder = new Binder.EnumEachBinder() {
+        @Override
+        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
+            // TODO fixed default value type "unsigned short"
+            Object value = read(eachContext, !type.isEmpty() ? type : "unsigned short");
+            Class<?> enumValueType = enumValueType(field.getType());
+            if (enumValueType == Void.TYPE) {
+                eachContext.setValue(getEnum(field.getType(), e -> e.ordinal() == (Integer) value));
+            } else if (enumValueType == Integer.TYPE) {
+                // TODO fixed getter method name "getValue"
+                eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+            } else if (enumValueType == Long.TYPE) {
+                // TODO fixed getter method name "getValue"
+                eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+            } else if (enumValueType == String.class) {
+                // TODO not implemented yet
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            } else {
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            }
+        }
+    };
+
+    /**
+     * Gets a type of user defined enum value.
+     * TODO depends enum implementation?
+     * @return null no suitable type found
+     */
+    Class<?> enumValueType(Class<?> enumClass) {
+        // enum constructor has
+        // parameters with (String:memberName, int:ordinal, XXX...:user specified types...)
+        // means from 3rd parameters are user defined values.
+if (Debug.isLoggable(Level.FINER)) {
+ Arrays.stream(enumClass.getDeclaredConstructors()).forEach(c -> {
+  System.err.println(c.getName() + "." + ClassUtil.signatureWithName(c));
+ });
+}
+        try {
+            // case simple enum, e.g.
+            // enum E { A, B, C }
+            Constructor<?> c = enumClass.getDeclaredConstructor(String.class, Integer.TYPE);
+            return Void.TYPE; // use ordinal (means no user defined value)
+        } catch (NoSuchMethodException e) {
+Debug.println(Level.FINER, e);
+        }
+        try {
+            // case enum with integer value, e.g.
+            // enum E { A(1), B(2), C(4); final int v; public int getValue() {return v;} E(int v) {this.v = v;}
+            Constructor<?> c = enumClass.getDeclaredConstructor(String.class, Integer.TYPE, Integer.TYPE);
+            return Integer.TYPE; // integer value
+        } catch (NoSuchMethodException e) {
+Debug.println(Level.FINER, e);
+        }
+        try {
+            // case enum with long value, e.g.
+            // enum E { A(1L), B(2L), C(4L); final long v; public long getValue() {return v;} E(long v) {this.v = v;}
+            Constructor<?> c = enumClass.getDeclaredConstructor(String.class, Integer.TYPE, Long.TYPE);
+            return Long.TYPE; // integer value
+        } catch (NoSuchMethodException e) {
+Debug.println(Level.FINER, e);
+        }
+        try {
+            // case enum with String value, e.g.
+            // enum E { A("alpha"), B("bravo"), C(""); final String v; public String getValue() {return v;} E(String v) {this.v = v;}
+            Constructor<?> c = enumClass.getDeclaredConstructor(String.class, Integer.TYPE, String.class);
+            return String.class; // string value
+        } catch (NoSuchMethodException e) {
+Debug.println(Level.FINER, e);
+        }
+        return null;
+    }
+
     /** */
     private final EachBinder[] eachBinders = {
         booleanEachBinder,
@@ -225,6 +403,7 @@ Debug.println(Level.FINER, sizeScript);
         characterEachBinder,
         arrayEachBinder,
         stringEachBinder,
+        enumEachBinder,
     };
 
     @Override

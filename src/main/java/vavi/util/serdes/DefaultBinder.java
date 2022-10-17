@@ -134,17 +134,16 @@ public class DefaultBinder implements Binder {
         }
     };
 
-    // Array
+    // Array, value=script for size
     protected EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            // Array
             DefaultEachContext eachContext = (DefaultEachContext) context;
             Object fieldValue = BeanUtil.getFieldValue(field, destBean);
             if (fieldValue != null) {
                 eachContext.size = Array.getLength(fieldValue);
             }
             String sizeScript = Element.Util.getValue(field);
-//Debug.println(sizeScript);
+Debug.println(Level.FINER, sizeScript);
             if (!sizeScript.isEmpty()) {
                 eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
             }
@@ -197,12 +196,12 @@ public class DefaultBinder implements Binder {
         }
     };
 
-    // String
+    // String, value=script for size
     protected EachBinder stringEachBinder = new Binder.StringEachBinder() {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String sizeScript = Element.Util.getValue(field);
-//Debug.println(sizeScript);
+Debug.println(Level.FINER, sizeScript);
             if (!sizeScript.isEmpty()) {
                 eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
             } else {

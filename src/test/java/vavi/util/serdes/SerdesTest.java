@@ -33,13 +33,13 @@ class SerdesTest {
 
     @Test
     void test() throws Exception {
-        InputStream is = Serdes.class.getResourceAsStream("/sample4.m4a");
+        InputStream is = SerdesTest.class.getResourceAsStream("/sample4.m4a");
         Box box = new Box();
         Serdes.Util.deserialize(is, box);
     }
 
     @Serdes
-    class Test2 {
+    static class Test2 {
         @Element(sequence = 1, value = "10") // value for String means source bytes length
         String str;
     }
@@ -53,7 +53,7 @@ class SerdesTest {
     }
 
     @Serdes(bigEndian = false) // global setting (LE)
-    class Test3 {
+    static class Test3 {
         @Element(sequence = 1, bigEndian = "true") // each setting (BE)
         int i1;
         @Element(sequence = 2) // default setting (LE)

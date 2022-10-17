@@ -38,7 +38,6 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
     /** */
     protected abstract EachContext getEachContext(int sequence, Boolean isBigEndian, Field field, Context context);
 
-
     @Override
     public Object deserialize(Object io, Object destBean) throws IOException {
         T in = getIOSource(io, Serdes.Util.isBigEndian(destBean));
@@ -48,7 +47,7 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
 
     /**
      * <ol>
-     * <li>retrieve fields which has {@link Target}
+     * <li>retrieve fields which has {@link Element}
      * <li>check condition
      * <li>do injection
      * <li>do validation
@@ -109,7 +108,7 @@ Debug.println(Level.FINE, field.getName() + ": " + field.getType() + eachContext
         for (Field field : fields) {
             int sequence = Element.Util.getSequence(field);
             if (sequence < 1) {
-                throw new IllegalArgumentException("sequence shoud be > 0: " + field.getName() + ", " + sequence);
+                throw new IllegalArgumentException("sequence should be > 0: " + field.getName() + ", " + sequence);
             }
             if (numbers.contains(sequence)) {
                 throw new IllegalArgumentException("duplicate sequence: " + field.getName() + ", " + sequence);

@@ -28,14 +28,14 @@ class JacksonXMLBeanBinderTest {
         public String s5 = "namachapanda";
         public int i6;
         @JacksonXmlProperty
-        String s7; // w/ annotation, private ok
+        String s7; // w/ @JacksonXmlProperty annotation, private ok
         public byte[] ba8;
     }
 
     @Test
     void test() throws Exception {
         Test1 test = new Test1();
-        String r = (String) Serdes.Util.serialize(test, "");
+        String r = Serdes.Util.serialize(test, "");
 System.err.println(r);
     }
 }

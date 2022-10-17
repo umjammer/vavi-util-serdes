@@ -148,10 +148,10 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;
             this.field = field;
-            this.context = DefaultContext.class.cast(context);
+            this.context = (DefaultContext) context;
 
             if (isBigEndian != null) {
-                dis = this.context.in.get(isBigEndian.booleanValue());
+                dis = this.context.in.get(isBigEndian);
             } else {
                 dis = this.context.in.defaultDis;
             }
@@ -193,7 +193,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
                 validationScript = "$" + sequence + ".equals(" + validation + ")";
             }
             try {
-                if (!Boolean.valueOf(context.engine.eval(validationScript).toString())) {
+                if (!Boolean.parseBoolean(context.engine.eval(validationScript).toString())) {
                     throw new IllegalArgumentException("validation for sequence " + sequence + " failed.\n" + validationScript);
                 }
             } catch (ScriptException e) {
@@ -201,7 +201,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             }
         }
         /**
-         * @param condition method name, signature is "method_name(I)B", argument is {@link #sequence()}
+         * @param condition method name, signature is "method_name(I)B", argument is {@link Element#sequence()}
          */
         @Override public boolean condition(String condition) {
             try {
@@ -219,7 +219,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
         @Override public String toString() {
             return (size != 0 ? "{" + size + "}" : "" ) + " = " +
-                    (byte[].class.isInstance(value) ? "\n" + StringUtil.getDump(byte[].class.cast(value), 64): value);
+                    (value instanceof byte[] ? "\n" + StringUtil.getDump((byte[]) value, 64): value);
         }
     }
 

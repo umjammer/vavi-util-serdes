@@ -37,10 +37,11 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
         int sequence;
         Field field;
         public SimpleContext<T> context;
+        @SuppressWarnings("unchecked")
         SimpleEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;
             this.field = field;
-            this.context = SimpleContext.class.cast(context);
+            this.context = (SimpleContext<T>) context;
         }
 
         @Override public void deserialize(Object destBean) throws IOException {

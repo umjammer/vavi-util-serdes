@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
 /**
  * Element.
  * <p>
- * {@link Serdes.Util#deserialize(java.nio.channels.SeekableByteChannel, Object)} method
+ * {@link Serdes.Util#deserialize(Object, Object)} method
  * searches super classes' methods annotated with {@link Element}
  * </p>
  * TODO validation message

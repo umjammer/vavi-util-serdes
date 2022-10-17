@@ -25,7 +25,7 @@ import vavi.util.serdes.JacksonXMLBeanBinder.DummyIOSource;
  */
 public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
 
-    XmlMapper xmlMapper = new XmlMapper();
+    private final XmlMapper xmlMapper = new XmlMapper();
 
     static class DummyIOSource implements BeanBinder.IOSource {
     }
@@ -42,10 +42,10 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
     @Override
     public Object deserialize(Object io, Object destBean) throws IOException {
         if (io instanceof String) {
-            String string = String.class.cast(io);
+            String string = (String) io;
             return xmlMapper.readValue(string, destBean.getClass());
         } else if (io instanceof InputStream) {
-            InputStream is = InputStream.class.cast(io);
+            InputStream is = (InputStream) io;
             return xmlMapper.readValue(is, destBean.getClass());
         } else {
             throw new IllegalArgumentException("unsupported class: " + io.getClass().getName());
@@ -61,7 +61,7 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
         if (io instanceof String) {
             return xmlMapper.writeValueAsString(destBean);
         } else if (io instanceof OutputStream) {
-            OutputStream os = OutputStream.class.cast(io);
+            OutputStream os = (OutputStream) io;
             xmlMapper.writeValue(os, destBean);
             return io;
         } else {

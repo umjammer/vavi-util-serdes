@@ -1,4 +1,5 @@
 [![](https://jitpack.io/v/umjammer/vavi-util-serdes.svg)](https://jitpack.io/#umjammer/vavi-util-serdes)
+[![Java CI](https://github.com/umjammer/vavi-util-serdes/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/vavi-util-serdes/actions/workflows/maven.yml)
 [![CodeQL](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml)
 ![Java](https://img.shields.io/badge/Java-8-b07219)
 
@@ -76,7 +77,7 @@
 
 ## TODO
 
- * ~~got error cause Validator is abstract~~ 
+ * ~~got error cause betwixt.Validator is abstract~~ 
  * ~~Binary Binding~~
  * Text Binding
  * validation engine -> "spi" or "method" like *condition*

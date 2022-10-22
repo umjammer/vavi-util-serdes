@@ -97,7 +97,14 @@ public interface Binder {
         }
     }
 
-    /** nested user defined class object annotated @Serdes */
+    // Enum
+    abstract class EnumEachBinder implements EachBinder {
+        @Override public boolean matches(Class<?> fieldClass) {
+            return fieldClass.isEnum();
+        }
+    }
+
+    /** nested user defined class object annotated {@link Serdes} */
     EachBinder defaultEachBinder = new EachBinder() {
         @Override public boolean matches(Class<?> fieldClass) {
             return fieldClass.getAnnotation(Serdes.class) != null;
@@ -117,7 +124,7 @@ public interface Binder {
     };
 
     /**
-     * @throws IllegalArgumentException when evel failed
+     * @throws IllegalArgumentException when eval failed
      * @throws UnsupportedOperationException float, double, char
      */
     default void bind(EachContext context, Object destBean, Field field) throws IOException {

@@ -8,6 +8,7 @@ package vavi.util.serdes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.util.logging.Level;
 
@@ -20,7 +21,9 @@ import vavi.util.Debug;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -33,13 +36,13 @@ class SerdesTest {
 
     @Test
     void test() throws Exception {
-        InputStream is = Serdes.class.getResourceAsStream("/sample4.m4a");
+        InputStream is = SerdesTest.class.getResourceAsStream("/sample4.m4a");
         Box box = new Box();
         Serdes.Util.deserialize(is, box);
     }
 
     @Serdes
-    class Test2 {
+    static class Test2 {
         @Element(sequence = 1, value = "10") // value for String means source bytes length
         String str;
     }
@@ -53,7 +56,7 @@ class SerdesTest {
     }
 
     @Serdes(bigEndian = false) // global setting (LE)
-    class Test3 {
+    static class Test3 {
         @Element(sequence = 1, bigEndian = "true") // each setting (BE)
         int i1;
         @Element(sequence = 2) // default setting (LE)
@@ -192,9 +195,10 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test7 test = new Test7();
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
             Serdes.Util.deserialize(is, test);
         });
+        assertTrue(e.getMessage().contains("validation"), e.getMessage());
     }
 
     @Serdes
@@ -257,9 +261,10 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test10 test = new Test10();
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
             Serdes.Util.deserialize(is, test);
         });
+        assertTrue(e.getMessage().contains("sequence should be > 0"), e.getMessage());
     }
 
     @Serdes
@@ -279,9 +284,10 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test11 test = new Test11();
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
             Serdes.Util.deserialize(is, test);
         });
+        assertTrue(e.getMessage().contains("duplicate sequence"), e.getMessage());
     }
 
     @Serdes
@@ -298,11 +304,126 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test12 test = new Test12();
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
             Serdes.Util.deserialize(is, test);
         });
+        assertTrue(e.getMessage().contains("sequence should be > 0"), e.getMessage());
     }
 
+    @Serdes
+    static class Test13 {
+        @Element(sequence = 1)
+        short[] sa = new short[2];
+        @Element(sequence = 2)
+        long[] la = new long[3];
+    }
+
+    @Test
+    @DisplayName("short, long array")
+    void test13() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeShort(0x1234);
+        dos.writeShort(0x5678);
+        dos.writeLong(0x1000_0000_0000_0000L);
+        dos.writeLong(0x1000_0000_0000_0001L);
+        dos.writeLong(0x1000_0000_0000_0002L);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test13 test = new Test13();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(0x5678, test.sa[1]);
+        assertEquals(0x1000_0000_0000_0002L, test.la[2]);
+    }
+
+    @Serdes
+    static class Test14 {
+        @Element(sequence = 1)
+        boolean z;
+        @Element(sequence = 2)
+        char c;
+        @Element(sequence = 3)
+        float f;
+        @Element(sequence = 4)
+        double d;
+    }
+
+    @Test
+    @DisplayName("boolean, char, float, double")
+    void test14() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeBoolean(true);
+        dos.writeChar('佐');
+        dos.writeFloat((float) Math.E);
+        dos.writeDouble(Math.PI);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test14 test = new Test14();
+        Serdes.Util.deserialize(is, test);
+        assertTrue(test.z);
+        assertEquals('佐', test.c);
+        assertEquals((float) Math.E, test.f);
+        assertEquals(Math.PI, test.d);
+    }
+
+    @Serdes
+    static class Test15 {
+        public enum A {
+            A1, A2
+        }
+        public enum B {
+            B1(10), B2(20);
+            final int v;
+            int getValue() { return v; } // TODO "getValue" is magic
+            B(int v) { this.v = v; }
+        }
+        @Element(sequence = 1)
+        A a;
+        @Element(sequence = 2)
+        B b;
+        @Element(sequence = 3, value = "int")
+        B b2;
+    }
+
+    @Test
+    @DisplayName("enum")
+    void test15() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeShort(1); // TODO short is default
+        dos.writeShort(20);
+        dos.writeInt(10);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test15 test = new Test15();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(Test15.A.A2, test.a);
+        assertEquals(Test15.B.B2, test.b);
+        assertEquals(Test15.B.B1, test.b2);
+    }
+
+    @Serdes
+    static class Test16 {
+        @Element(sequence = 1)
+        int size;
+        @Element(sequence = 2, value = "$1")
+        byte[] ba;
+    }
+
+    @Test
+    @DisplayName("undefined array")
+    void test16() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeInt(8);
+        dos.write("umjammer".getBytes());
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test16 test = new Test16();
+        Serdes.Util.deserialize(is, test);
+        assertArrayEquals("umjammer".getBytes(), test.ba);
+    }
 }
 
 /* */

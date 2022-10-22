@@ -17,22 +17,30 @@ import java.io.IOException;
  */
 public interface BeanBinder<IO extends BeanBinder.IOSource> {
 
-    /** */
+    /** holds io complexity like endian */
     interface IOSource {
     }
 
-    /** */
+    /** holds conversion context */
     interface Context {
     }
 
     /**
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException args is not supported
      */
     IO getIOSource(Object... args) throws IOException;
 
-    void deserialize(Object in, Object destBean) throws IOException;
+    /**
+     * @return the same as destBean
+     * @throws IllegalArgumentException in type is not supported
+     */
+    Object deserialize(Object in, Object destBean) throws IOException;
 
-    void serialize(Object destBean, Object out) throws IOException;
+    /**
+     * @return the same as out
+     * @throws IllegalArgumentException out type is not supported
+     */
+    Object serialize(Object destBean, Object out) throws IOException;
 }
 
 /* */

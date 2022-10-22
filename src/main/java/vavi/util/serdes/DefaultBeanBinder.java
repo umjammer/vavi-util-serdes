@@ -52,12 +52,12 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     public DefaultIOSource getIOSource(Object... args) throws IOException {
         DefaultIOSource in = new DefaultIOSource();
         if (args[0] instanceof InputStream) {
-            InputStream is = InputStream.class.cast(args[0]);
+            InputStream is = (InputStream) args[0];
             in.bedis = new DataInputStream(is);
             in.ledis = new LittleEndianDataInputStream(is);
             in.available = is.available();
         } else if (args[0] instanceof SeekableByteChannel) {
-            SeekableByteChannel sbc = SeekableByteChannel.class.cast(args[0]);
+            SeekableByteChannel sbc = (SeekableByteChannel) args[0];
             in.bedis = new SeekableDataInputStream(sbc);
             in.ledis = new LittleEndianSeekableDataInputStream(sbc);
             in.available = (int) (sbc.size() - sbc.position());
@@ -91,7 +91,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         DefaultBeanBinder beanBinder;
 
         DefaultContext(IOSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
-            this.in = DefaultIOSource.class.cast(in);
+            this.in = (DefaultIOSource) in;
             this.fields = fields;
             this.bean = bean;
             this.beanBinder = beanBinder;
@@ -108,7 +108,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         /** for script */
-        private static Map<Object, Integer> sizeMap = new HashMap<>();
+        private static final Map<Object, Integer> sizeMap = new HashMap<>();
 
         /** a function for script */
         public static int sizeof(Object arg) {
@@ -148,10 +148,10 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;
             this.field = field;
-            this.context = DefaultContext.class.cast(context);
+            this.context = (DefaultContext) context;
 
             if (isBigEndian != null) {
-                dis = this.context.in.get(isBigEndian.booleanValue());
+                dis = this.context.in.get(isBigEndian);
             } else {
                 dis = this.context.in.defaultDis;
             }
@@ -193,7 +193,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
                 validationScript = "$" + sequence + ".equals(" + validation + ")";
             }
             try {
-                if (!Boolean.valueOf(context.engine.eval(validationScript).toString())) {
+                if (!Boolean.parseBoolean(context.engine.eval(validationScript).toString())) {
                     throw new IllegalArgumentException("validation for sequence " + sequence + " failed.\n" + validationScript);
                 }
             } catch (ScriptException e) {
@@ -201,7 +201,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             }
         }
         /**
-         * @param condition method name, signature is "method_name(I)B", argument is {@link #sequence()}
+         * @param condition method name, signature is "method_name(I)B", argument is {@link Element#sequence()}
          */
         @Override public boolean condition(String condition) {
             try {
@@ -219,7 +219,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
         @Override public String toString() {
             return (size != 0 ? "{" + size + "}" : "" ) + " = " +
-                    (byte[].class.isInstance(value) ? "\n" + StringUtil.getDump(byte[].class.cast(value), 64): value);
+                    (value instanceof byte[] ? "\n" + StringUtil.getDump((byte[]) value, 64): value);
         }
     }
 

@@ -99,6 +99,14 @@ public @interface Serdes {
         }
 
         /**
+         * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
+         */
+        static String encoding(Object destBean) {
+            Serdes serdesAnnotation = getAnnotation(destBean);
+            return serdesAnnotation.encoding();
+        }
+
+        /**
          *
          * @throws NullPointerException when field is not annotated by {@link Serdes}
          */

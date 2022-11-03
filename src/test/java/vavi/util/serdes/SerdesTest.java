@@ -10,18 +10,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import vavi.test.box.Box;
 import vavi.util.ByteUtil;
 import vavi.util.Debug;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -423,6 +422,44 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         Test16 test = new Test16();
         Serdes.Util.deserialize(is, test);
         assertArrayEquals("umjammer".getBytes(), test.ba);
+    }
+
+    @Serdes(encoding = "MS932") // encoding affect all member fields of strings
+    static class Test17 {
+        @Element(sequence = 1, value = "4") // string length is "bytes length after encoded"
+        String s;
+    }
+
+    @Test
+    @DisplayName("encoding at serdes")
+    void test17() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.write("直秀".getBytes(Charset.forName("MS932")));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test17 test = new Test17();
+        Serdes.Util.deserialize(is, test);
+        assertEquals("直秀", test.s);
+    }
+
+    @Serdes(encoding = "MS932")
+    static class Test18 {
+        @Element(sequence = 1, value = "4", encoding = "EUCJIS") // encoding affects only here and ignored at encoding at serdes
+        String s;
+    }
+
+    @Test
+    @DisplayName("encoding at element and stronger than at serdes")
+    void test18() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.write("直秀".getBytes(Charset.forName("EUCJIS")));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test18 test = new Test18();
+        Serdes.Util.deserialize(is, test);
+        assertEquals("直秀", test.s);
     }
 }
 

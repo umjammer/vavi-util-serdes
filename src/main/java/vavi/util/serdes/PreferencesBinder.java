@@ -16,7 +16,7 @@ import vavi.beans.BeanUtil;
 /**
  * PreferencesBinder.
  * <ul>
- * <li> {@link Element#value()} ... name (when not specified, use fieald name)
+ * <li> {@link Element#value()} ... name (when not specified, use field name)
  * <li> fieldValue ... default value
  * </ul>
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)

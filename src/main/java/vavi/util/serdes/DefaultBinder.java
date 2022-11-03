@@ -12,6 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ import java.util.logging.Level;
 import vavi.beans.BeanUtil;
 import vavi.beans.ClassUtil;
 import vavi.util.Debug;
+import vavi.util.StringUtil;
 import vavi.util.serdes.DefaultBeanBinder.DefaultEachContext;
 
 
@@ -253,7 +255,17 @@ Debug.println(Level.FINER, sizeScript);
             }
             byte[] bytes = new byte[eachContext.size];
             eachContext.dis.readFully(bytes);
-            context.setValue(new String(bytes));
+            String encoding = Element.Util.getEncoding(field);
+            if (encoding.isEmpty()) {
+                encoding = Serdes.Util.encoding(destBean);
+            }
+            if (!encoding.isEmpty()) {
+Debug.println(Level.FINE, encoding);
+                context.setValue(new String(bytes, Charset.forName(encoding)));
+            } else {
+Debug.println(Level.FINE, "no encoding: " +bytes.length + " bytes\n" + StringUtil.getDump(bytes));
+                context.setValue(new String(bytes));
+            }
         }
     };
 

@@ -139,7 +139,7 @@ public class PreferencesBinder implements Binder {
                 byte[] fieldValue = (byte[]) BeanUtil.getFieldValue(field, destBean);
                 context.setValue(prefs.getByteArray(name, fieldValue));
             } else {
-                throw new IllegalArgumentException("unsupported array: " + fieldElementClass.getClass().getName());
+                throw new IllegalArgumentException("unsupported array: " + fieldElementClass.getName());
             }
         }
     };

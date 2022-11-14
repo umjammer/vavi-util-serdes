@@ -86,7 +86,7 @@ Debug.println(Level.FINE, "condition check is false");
             }
 Debug.println(Level.FINE, "binder: " + binder.getClass().getName());
             binder.bind(eachContext, destBean, field);
-Debug.println(Level.FINE, field.getName() + ": " + field.getType() + eachContext);
+Debug.println(Level.FINE, field.getName() + ": " + field.getType() + ", " + eachContext);
             eachContext.settleValues();
 
             // validation

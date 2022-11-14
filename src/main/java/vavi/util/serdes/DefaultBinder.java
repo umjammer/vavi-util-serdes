@@ -12,8 +12,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
@@ -33,7 +36,7 @@ import vavi.util.serdes.DefaultBeanBinder.DefaultEachContext;
  *
  *  * beanshell
  *
- * prebound
+ * pre-bound
  *
  *  * $# # is 1, 2, 3 ...
  *  * $0 is whole data length
@@ -63,6 +66,7 @@ import vavi.util.serdes.DefaultBeanBinder.DefaultEachContext;
  * @see DefaultBeanBinder.DefaultContext#len(Object)
  * @see DefaultBeanBinder.DefaultContext#sizeMap
  */
+@SuppressWarnings("JavadocReference")
 public class DefaultBinder implements Binder {
 
     // Boolean
@@ -226,7 +230,7 @@ Debug.println(Level.FINER, sizeScript);
                     throw new UnsupportedOperationException("use @Bound: " + fieldElementClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
                 }
                 try {
-                    if (fieldValue != null) {
+                    if (fieldValue == null) {
                         fieldValue = Array.newInstance(fieldElementClass, eachContext.size);
                     }
                     for (int i = 0; i < eachContext.size; i++) {
@@ -234,7 +238,81 @@ Debug.println(Level.FINER, sizeScript);
                         eachContext.deserialize(fieldBean);
                         Array.set(fieldValue, i, fieldBean);
                     }
-                    eachContext.value = fieldValue;
+                    context.setValue(fieldValue);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+    };
+
+    // List, value=script for size
+    protected EachBinder listEachBinder = new Binder.ListEachBinder() {
+        @SuppressWarnings("unchecked")
+        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            Object fieldValue = BeanUtil.getFieldValue(field, destBean);
+            String sizeScript = Element.Util.getValue(field);
+Debug.println(Level.FINER, sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+
+            Class<?> genericTypeClass = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            if (genericTypeClass.equals(Byte.class)) {
+                // byte list
+                if (fieldValue == null) {
+                    fieldValue = new ArrayList<>(eachContext.size);
+                }
+                byte[] buf = new byte[eachContext.size];
+                eachContext.dis.readFully(buf, 0, eachContext.size);
+                for (byte b : buf) {
+                    ((List<Byte>) fieldValue).add(b);
+                }
+                context.setValue(fieldValue);
+            } else if (genericTypeClass.equals(Short.class)) {
+                // short list
+                if (fieldValue == null) {
+                    fieldValue = new ArrayList<>(eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    ((List<Short>) fieldValue).add(eachContext.dis.readShort());
+                }
+                context.setValue(fieldValue);
+            } else if (genericTypeClass.equals(Integer.class)) {
+                // int list
+                if (fieldValue == null) {
+                    fieldValue = new ArrayList<>(eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    ((List<Integer>) fieldValue).add(eachContext.dis.readInt());
+                }
+                context.setValue(fieldValue);
+            } else if (genericTypeClass.equals(Long.class)) {
+                // long list
+                if (fieldValue == null) {
+                    fieldValue = new ArrayList<>(eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    ((List<Long>) fieldValue).add(eachContext.dis.readLong());
+                }
+                context.setValue(fieldValue);
+            } else {
+                // object list
+                Serdes annotation = genericTypeClass.getAnnotation(Serdes.class);
+                if (annotation == null) {
+                    throw new UnsupportedOperationException("use @Bound: " + genericTypeClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+                }
+                try {
+                    if (fieldValue == null) {
+                        fieldValue = new ArrayList<>(eachContext.size);
+                    }
+                    for (int i = 0; i < eachContext.size; i++) {
+                        Object fieldBean = genericTypeClass.newInstance();
+                        eachContext.deserialize(fieldBean);
+                        ((List<Object>) fieldValue).add(fieldBean);
+                    }
+                    context.setValue(fieldValue);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
@@ -416,6 +494,7 @@ Debug.println(Level.FINER, e);
         arrayEachBinder,
         stringEachBinder,
         enumEachBinder,
+        listEachBinder,
     };
 
     @Override

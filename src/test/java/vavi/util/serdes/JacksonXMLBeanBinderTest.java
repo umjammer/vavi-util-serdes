@@ -6,6 +6,9 @@
 
 package vavi.util.serdes;
 
+import java.nio.file.Files;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -20,7 +23,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 class JacksonXMLBeanBinderTest {
 
     @Serdes(beanBinder = JacksonXMLBeanBinder.class)
-    class Test1 {
+    static class Test1 {
         public int i1; // w/o annotation, should be public
         public String s2;
         public boolean b3 = true;
@@ -37,6 +40,20 @@ class JacksonXMLBeanBinderTest {
         Test1 test = new Test1();
         String r = Serdes.Util.serialize(test, "");
 System.err.println(r);
+    }
+
+    @Serdes(beanBinder = JacksonXMLBeanBinder.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class Test2 {
+        @JacksonXmlProperty(localName = "full-path", isAttribute = true)
+        String fillPath;
+    }
+
+    @Test
+    void test2() throws Exception {
+        Test2 test = new Test2();
+        Serdes.Util.deserialize(JacksonXMLBeanBinderTest.class.getResourceAsStream("/container.xml"), test);
+System.err.println(test.fillPath);
     }
 }
 

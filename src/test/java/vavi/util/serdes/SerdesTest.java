@@ -11,6 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.junit.jupiter.api.DisplayName;
@@ -460,6 +462,32 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         Test18 test = new Test18();
         Serdes.Util.deserialize(is, test);
         assertEquals("直秀", test.s);
+    }
+
+    @Serdes
+    static class Test19 {
+        @Element(sequence = 1, value = "8")
+        List<Byte> bl;
+        @Element(sequence = 2, value = "3")
+        List<Long> ll = new ArrayList<>(3);
+    }
+
+    @Test
+    @DisplayName("list")
+    void test19() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write("umjammer".getBytes());
+        baos.write(ByteUtil.getBeBytes(13L));
+        baos.write(ByteUtil.getBeBytes(14L));
+        baos.write(ByteUtil.getBeBytes(15L));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test19 test = new Test19();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(8, test.bl.size());
+Debug.println(test.bl);
+        assertEquals((byte) 'j', test.bl.get(2));
+        assertEquals(14L, test.ll.get(1));
     }
 }
 

@@ -90,6 +90,13 @@ public interface Binder {
         }
     }
 
+    // List
+    abstract class ListEachBinder implements EachBinder {
+        @Override public boolean matches(Class<?> fieldClass) {
+            return fieldClass.isAssignableFrom(java.util.List.class);
+        }
+    }
+
     // String
     abstract class StringEachBinder implements EachBinder {
         @Override public boolean matches(Class<?> fieldClass) {
@@ -138,7 +145,7 @@ public interface Binder {
             } else {
                 throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
             }
-        };
+        }
 
         BeanUtil.setFieldValue(field, destBean, context.getValue());
     }

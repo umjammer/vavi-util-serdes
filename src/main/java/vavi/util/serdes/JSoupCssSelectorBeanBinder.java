@@ -15,12 +15,12 @@ import org.jsoup.nodes.Document;
 
 
 /**
- * JSoupBeanBinder.
+ * JSoupCssSelectorBeanBinder.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 2022-11-07 nsano initial version <br>
  */
-public class JSoupBeanBinder extends SimpleBeanBinder<JSoupBeanBinder.NullIOSource> {
+public class JSoupCssSelectorBeanBinder extends SimpleBeanBinder<JSoupCssSelectorBeanBinder.NullIOSource> {
 
     Document document;
 
@@ -46,6 +46,6 @@ public class JSoupBeanBinder extends SimpleBeanBinder<JSoupBeanBinder.NullIOSour
 
     @Override
     protected Binder getDefaultBinder() {
-        return new JSoupBinder(document);
+        return new JSoupCssSelectorBinder(document);
     }
 }

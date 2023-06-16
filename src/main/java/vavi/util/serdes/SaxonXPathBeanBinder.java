@@ -9,17 +9,9 @@ package vavi.util.serdes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.logging.Level;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.xml.sax.InputSource;
 import vavi.util.Debug;
-import vavi.xml.util.PrettyPrinter;
 
 
 /**
@@ -62,6 +54,6 @@ Debug.println(Level.FINE, "source: " + source);
 
     @Override
     protected Binder getDefaultBinder() {
-        return new SaxonBinder(source);
+        return new SaxonXPathBinder(source);
     }
 }

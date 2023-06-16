@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2022 by Naohide Sano, All rights reserved.
+ *
+ * Programmed by Naohide Sano
+ */
+
+package vavi.util.serdes;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+
+import vavi.util.Debug;
+
+
+/**
+ * JaywayJsonPathBeanBinder.
+ *
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
+ * @version 0.00 2022-12-18 nsano initial version <br>
+ */
+public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBeanBinder.NullIOSource> {
+
+    String source;
+
+    static class NullIOSource implements BeanBinder.IOSource {
+    }
+
+    @Override
+    public NullIOSource getIOSource(Object... args) throws IOException {
+        NullIOSource io = new NullIOSource();
+        if (args[0] instanceof InputStream) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            InputStream is = (InputStream) args[0];
+            byte[] b = new byte[8192];
+            while (true) {
+                int r = is.read(b);
+                if (r < 0) break;
+                baos.write(b, 0, r);
+            }
+            source = baos.toString();
+Debug.println(Level.FINE, "source: " + source);
+        } else {
+            throw new IllegalArgumentException("unsupported class: " + args[0].getClass().getName());
+        }
+        return io;
+    }
+
+    @Override
+    public Object serialize(Object destBean, Object io) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected Binder getDefaultBinder() {
+        return new JaywayJsonPathBinder(source);
+    }
+}

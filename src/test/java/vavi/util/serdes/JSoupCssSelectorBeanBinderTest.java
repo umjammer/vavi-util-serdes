@@ -6,9 +6,6 @@
 
 package vavi.util.serdes;
 
-import java.util.prefs.Preferences;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -23,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/11/07 umjammer initial version <br>
  */
-class JSoupBeanBinderTest {
+class JSoupCssSelectorBeanBinderTest {
 
-    @Serdes(beanBinder = JSoupBeanBinder.class)
+    @Serdes(beanBinder = JSoupCssSelectorBeanBinder.class)
     static class Test1 {
         @Element(value = "rootfile[fill-path]")
         String fillPath;
@@ -35,7 +32,7 @@ class JSoupBeanBinderTest {
     @Disabled("jsoup url is for http(s) only")
     void test() throws Exception {
         Test1 test = new Test1();
-        Serdes.Util.deserialize(JSoupBeanBinderTest.class.getResourceAsStream("/container.xml"), test);
+        Serdes.Util.deserialize(JSoupCssSelectorBeanBinderTest.class.getResourceAsStream("/container.xml"), test);
 System.err.println(test.fillPath);
     }
 }

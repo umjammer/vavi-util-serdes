@@ -74,6 +74,7 @@
 
  * [Kaitai.io](http://kaitai.io/)
  * [struct](https://docs.python.org/3/library/struct.html)
+ * https://github.com/raydac/java-binary-block-parser
 
 ## TODO
 
@@ -90,3 +91,5 @@
  * xml
    * [simple](http://simple.sourceforge.net/home.php)
    * [jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
+ * read write xml by jaxp document
+   * see vavi-apps-ebook:EpubManipulator

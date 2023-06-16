@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PreferencesBeanBinderTest {
 
     @Serdes(beanBinder = PreferencesBeanBinder.class)
-    class Test1 {
+    static class Test1 {
         @Element
         int i1;
         @Element

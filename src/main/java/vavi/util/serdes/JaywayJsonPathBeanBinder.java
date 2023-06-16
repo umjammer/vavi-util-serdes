@@ -15,12 +15,12 @@ import vavi.util.Debug;
 
 
 /**
- * SaxonXPathBeanBinder.
+ * JaywayJsonPathBeanBinder.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
- * @version 0.00 2022-11-07 nsano initial version <br>
+ * @version 0.00 2022-12-18 nsano initial version <br>
  */
-public class SaxonXPathBeanBinder extends SimpleBeanBinder<SaxonXPathBeanBinder.NullIOSource> {
+public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBeanBinder.NullIOSource> {
 
     String source;
 
@@ -54,6 +54,6 @@ Debug.println(Level.FINE, "source: " + source);
 
     @Override
     protected Binder getDefaultBinder() {
-        return new SaxonXPathBinder(source);
+        return new JaywayJsonPathBinder(source);
     }
 }

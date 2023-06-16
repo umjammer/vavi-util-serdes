@@ -489,6 +489,39 @@ Debug.println(test.bl);
         assertEquals((byte) 'j', test.bl.get(2));
         assertEquals(14L, test.ll.get(1));
     }
+
+    @Serdes
+    static class Test20_Child {
+        @Element(sequence = 1)
+        int child;
+        @Override public String toString() { return "Child: " + child; }
+    }
+
+    @Serdes
+    static class Test20 {
+        @Element(sequence = 1)
+        int size;
+        @Element(sequence = 2, value = "$1")
+        List<Test20_Child> chldren = new ArrayList<>();
+    }
+
+    @Test
+    @DisplayName("list")
+    void test20() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(3));
+        baos.write(ByteUtil.getBeBytes(100));
+        baos.write(ByteUtil.getBeBytes(200));
+        baos.write(ByteUtil.getBeBytes(300));
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test20 test = new Test20();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(3, test.chldren.size());
+Debug.println(test.chldren);
+        assertEquals(100, test.chldren.get(0).child);
+        assertEquals(300, test.chldren.get(2).child);
+    }
 }
 
 /* */

@@ -13,7 +13,7 @@ import org.jsoup.nodes.Document;
 
 
 /**
- * JSoupBinder.
+ * JSoupCssSelectorBinder.
  * <ul>
  * <li> {@link Element#value()} ... css selector
  * <li> fieldValue ... default value
@@ -21,11 +21,11 @@ import org.jsoup.nodes.Document;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/11/07 umjammer initial version <br>
  */
-public class JSoupBinder implements Binder {
+public class JSoupCssSelectorBinder implements Binder {
 
     Document document;
 
-    JSoupBinder(Document document) {
+    JSoupCssSelectorBinder(Document document) {
         this.document = document;
     }
 

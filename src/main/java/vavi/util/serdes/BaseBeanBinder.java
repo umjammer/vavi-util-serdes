@@ -84,7 +84,7 @@ Debug.println(Level.FINE, "condition check is false");
             if (Bound.Util.isBound(field)) {
                 binder = Bound.Util.getBinder(field);
             }
-Debug.println(Level.FINE, "binder: " + binder.getClass().getName());
+Debug.println(Level.FINER, "binder: " + binder.getClass().getName());
             binder.bind(eachContext, destBean, field);
 Debug.println(Level.FINE, field.getName() + ": " + field.getType() + ", " + eachContext);
             eachContext.settleValues();

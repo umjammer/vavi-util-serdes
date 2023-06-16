@@ -19,15 +19,13 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import net.sf.saxon.om.NodeInfo;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import vavi.beans.BeanUtil;
 import vavi.util.Debug;
 
 
 /**
- * SaxonBinder.
+ * SaxonXPathBinder.
  * <ul>
  * <li> {@link Element#value()} ... XPath
  * <li> fieldValue ... default value
@@ -35,7 +33,7 @@ import vavi.util.Debug;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/11/07 umjammer initial version <br>
  */
-public class SaxonBinder implements Binder {
+public class SaxonXPathBinder implements Binder {
 
     private static final String JAXP_KEY_XPF = XPathFactory.DEFAULT_PROPERTY_NAME + ":" + XPathFactory.DEFAULT_OBJECT_MODEL_URI;
     private static final String JAXP_VALUE_XPF_SAXON = "net.sf.saxon.xpath.XPathFactoryImpl";
@@ -56,7 +54,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
 
     private String source;
 
-    SaxonBinder(String source) {
+    SaxonXPathBinder(String source) {
         this.source = source;
     }
 
@@ -192,7 +190,7 @@ Debug.println(Level.FINER, sizeScript);
                 @SuppressWarnings("unchecked")
                 List<NodeInfo> nodeList = (List<NodeInfo>) nodeSet;
 if (nodeList.size() == 0) {
-Debug.println(Level.WARNING, "no node list: " + xpath);
+ Debug.println(Level.WARNING, "no node list: " + xpath);
 }
                 List<Object> result = new ArrayList<>();
                 for (int i = 0; i < eachContext.size; i++) {

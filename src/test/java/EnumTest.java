@@ -40,11 +40,11 @@ public class EnumTest {
     /** */
     public static void main(String[] args) throws Exception {
         Class<? extends Enum<?>> e = TestEnum2.class;
-        Debug.println("isEnum: " + e.isEnum());
-        Arrays.stream(e.getDeclaredConstructors()).forEach(c -> {
-            System.err.println(c.getName() +"." + ClassUtil.signatureWithName(c));
-        });
+Debug.println("isEnum: " + e.isEnum());
+Arrays.stream(e.getDeclaredConstructors()).forEach(c -> {
+ System.err.println(c.getName() +"." + ClassUtil.signatureWithName(c));
+});
         Method m = EnumTest.class.getMethod("main", String[].class);
-        System.err.println(ClassUtil.signatureWithName(m));
+Debug.println(ClassUtil.signatureWithName(m));
     }
 }

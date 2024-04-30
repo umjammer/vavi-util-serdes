@@ -34,5 +34,3 @@ public class SerdestTest {
         System.err.println("bean: " + bean);
     }
 }
-
-/* */

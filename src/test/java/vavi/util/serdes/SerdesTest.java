@@ -523,5 +523,3 @@ Debug.println(test.chldren);
         assertEquals(300, test.chldren.get(2).child);
     }
 }
-
-/* */

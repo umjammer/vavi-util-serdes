@@ -54,5 +54,3 @@ public class PreferencesBeanBinder extends SimpleBeanBinder<NullIOSource> {
         return new PreferencesBinder(prefs);
     }
 }
-
-/* */

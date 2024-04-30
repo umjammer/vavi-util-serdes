@@ -69,5 +69,3 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
         }
     }
 }
-
-/* */

@@ -36,5 +36,3 @@ class JSoupCssSelectorBeanBinderTest {
 System.err.println(test.fillPath);
     }
 }
-
-/* */

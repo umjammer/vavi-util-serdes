@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/umjammer/vavi-util-serdes.svg)](https://jitpack.io/#umjammer/vavi-util-serdes)
 [![Java CI](https://github.com/umjammer/vavi-util-serdes/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/vavi-util-serdes/actions/workflows/maven.yml)
 [![CodeQL](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/vavi-util-serdes/actions/workflows/codeql-analysis.yml)
-![Java](https://img.shields.io/badge/Java-8-b07219)
+![Java](https://img.shields.io/badge/Java-17-b07219)
 
 # vavi-util-serdes
 
@@ -9,9 +9,11 @@
 
 ## Install
 
- * [jitpack](https://jitpack.io/#umjammer/vavi-util-serdes)
+ * [maven](https://jitpack.io/#umjammer/vavi-util-serdes)
 
-## How To
+## Usage
+
+### How To
 
  * define
 
@@ -46,7 +48,7 @@
     Serdes.Util.deserialize(is, header);
 ```
 
-## Feature
+### Feature
 
  * validation
  * condition
@@ -54,7 +56,7 @@
 
     https://github.com/umjammer/vavi-util-binaryio/blob/master/src/test/java/vavi/util/serdes/SerdesTest.java
 
-## Binders
+### Binders
 
  [My plan](https://github.com/umjammer/vavi-util-screenscraping/wiki/AnnotationIinjectionIntoPOJO) will finally come into play.
 
@@ -69,8 +71,9 @@
 |cli | ⏳ | klab-commons-cli |
 |csv | ⏳ | klab-commons-csv |
 
+## References
 
-## Rivals
+### Rivals
 
  * [Kaitai.io](http://kaitai.io/)
  * [struct](https://docs.python.org/3/library/struct.html)

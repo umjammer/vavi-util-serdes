@@ -239,5 +239,3 @@ Debug.println(Level.FINER, "xpath: " + xpath + ", string: " + text);
         return eachBinders;
     }
 }
-
-/* */

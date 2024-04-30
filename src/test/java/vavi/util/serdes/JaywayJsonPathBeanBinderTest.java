@@ -47,5 +47,3 @@ class JaywayJsonPathBeanBinderTest {
 System.err.println(r);
     }
 }
-
-/* */

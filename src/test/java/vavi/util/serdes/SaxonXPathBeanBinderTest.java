@@ -38,5 +38,3 @@ System.err.println(test.fillPath);
         assertEquals("item/standard.opf", test.fillPath);
     }
 }
-
-/* */

@@ -31,5 +31,3 @@ public class Box {
     @Element(sequence = 3, value = "$1 - sizeof($1) - len($2)")
     byte[] data;
 }
-
-/* */

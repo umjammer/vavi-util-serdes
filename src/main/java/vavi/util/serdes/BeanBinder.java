@@ -42,5 +42,3 @@ public interface BeanBinder<IO extends BeanBinder.IOSource> {
      */
     Object serialize(Object destBean, Object out) throws IOException;
 }
-
-/* */

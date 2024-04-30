@@ -70,5 +70,3 @@ class PreferencesBeanBinderTest {
         prefs.removeNode();
     }
 }
-
-/* */

@@ -177,5 +177,3 @@ public class PreferencesBinder implements Binder {
         return eachBinders;
     }
 }
-
-/* */

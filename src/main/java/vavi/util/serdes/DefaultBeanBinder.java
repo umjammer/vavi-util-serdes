@@ -241,5 +241,3 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         return new DefaultEachContext(sequence, isBigEndian, field, context);
     }
 }
-
-/* */

@@ -179,5 +179,3 @@ Debug.println(Level.FINER, "jsonPath: " + jsonPath + ", string: " + text);
         return eachBinders;
     }
 }
-
-/* */

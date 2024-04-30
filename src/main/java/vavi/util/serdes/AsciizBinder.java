@@ -26,5 +26,3 @@ public class AsciizBinder implements Binder {
         // TODO Auto-generated method stub
     }
 }
-
-/* */

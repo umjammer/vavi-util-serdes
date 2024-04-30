@@ -180,5 +180,3 @@ public interface Binder {
     /** */
     EachBinder[] getEachBinders();
 }
-
-/* */

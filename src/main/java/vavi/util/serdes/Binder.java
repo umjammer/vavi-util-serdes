@@ -8,6 +8,7 @@ package vavi.util.serdes;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -120,11 +121,11 @@ public interface Binder {
             try {
                 Object fieldValue = BeanUtil.getFieldValue(field, destBean);
                 if (fieldValue == null) {
-                    fieldValue = field.getType().newInstance();
+                    fieldValue = field.getType().getDeclaredConstructor().newInstance();
                 }
                 context.deserialize(fieldValue);
                 context.setValue(fieldValue);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalStateException(e);
             }
         }

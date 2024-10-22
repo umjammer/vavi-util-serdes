@@ -8,8 +8,6 @@ package vavi.util.serdes;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

@@ -27,6 +27,6 @@ public abstract class Validator {
         return sequence;
     }
 
-    /** */
+//    /** */
 //    public abstract boolean validate(String value);
 }

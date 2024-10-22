@@ -21,7 +21,7 @@ public class EnumTest {
 
     enum TestEnum1 {
         ELEMENT_1A,
-        ELEMENT_1B;
+        ELEMENT_1B
     }
 
     enum TestEnum2 {
@@ -41,9 +41,9 @@ public class EnumTest {
     public static void main(String[] args) throws Exception {
         Class<? extends Enum<?>> e = TestEnum2.class;
 Debug.println("isEnum: " + e.isEnum());
-Arrays.stream(e.getDeclaredConstructors()).forEach(c -> {
- System.err.println(c.getName() +"." + ClassUtil.signatureWithName(c));
-});
+Arrays.stream(e.getDeclaredConstructors()).forEach(c ->
+ System.err.println(c.getName() +"." + ClassUtil.signatureWithName(c))
+);
         Method m = EnumTest.class.getMethod("main", String[].class);
 Debug.println(ClassUtil.signatureWithName(m));
     }

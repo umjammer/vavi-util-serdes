@@ -7,15 +7,18 @@
 package vavi.util.serdes;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import com.jayway.jsonpath.JsonPath;
 import vavi.beans.BeanUtil;
-import vavi.util.Debug;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -30,14 +33,16 @@ import vavi.util.Debug;
  */
 public class JaywayJsonPathBinder implements Binder {
 
-    private String source;
+    private static final Logger logger = getLogger(JaywayJsonPathBinder.class.getName());
+
+    private final String source;
 
     JaywayJsonPathBinder(String source) {
         this.source = source;
     }
 
     // Boolean
-    protected EachBinder booleanEachBinder = new BooleanEachBinder() {
+    protected final EachBinder booleanEachBinder = new BooleanEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -46,7 +51,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Integer
-    protected EachBinder integerEachBinder = new IntegerEachBinder() {
+    protected final EachBinder integerEachBinder = new IntegerEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -55,7 +60,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Short
-    protected EachBinder shortEachBinder = new ShortEachBinder() {
+    protected final EachBinder shortEachBinder = new ShortEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -64,7 +69,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Byte
-    protected EachBinder byteEachBinder = new ByteEachBinder() {
+    protected final EachBinder byteEachBinder = new ByteEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -73,7 +78,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Long
-    protected EachBinder longEachBinder = new LongEachBinder() {
+    protected final EachBinder longEachBinder = new LongEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -82,7 +87,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Float
-    protected EachBinder floatEachBinder = new FloatEachBinder() {
+    protected final EachBinder floatEachBinder = new FloatEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -91,7 +96,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Double
-    protected EachBinder doubleEachBinder = new DoubleEachBinder() {
+    protected final EachBinder doubleEachBinder = new DoubleEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -100,7 +105,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Character
-    protected EachBinder characterEachBinder = new CharacterEachBinder() {
+    protected final EachBinder characterEachBinder = new CharacterEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
@@ -109,7 +114,7 @@ public class JaywayJsonPathBinder implements Binder {
     };
 
     // Array
-    protected EachBinder arrayEachBinder = new ArrayEachBinder() {
+    protected final EachBinder arrayEachBinder = new ArrayEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             DefaultBeanBinder.DefaultEachContext eachContext = (DefaultBeanBinder.DefaultEachContext) context;
@@ -118,7 +123,7 @@ public class JaywayJsonPathBinder implements Binder {
                 eachContext.size = Array.getLength(fieldValue);
             }
             String sizeScript = Element.Util.getValue(field);
-Debug.println(Level.FINER, sizeScript);
+logger.log(Level.TRACE, sizeScript);
             if (!sizeScript.isEmpty()) {
                 eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
             }
@@ -133,34 +138,34 @@ Debug.println(Level.FINER, sizeScript);
             try {
                 String jsonPath = Element.Util.getValue(field);
                 List<String> list = JsonPath.read(source, jsonPath);
-if (list.size() == 0) {
- Debug.println(Level.WARNING, "no list: " + jsonPath);
+if (list.isEmpty()) {
+ logger.log(Level.WARNING, "no list: " + jsonPath);
 }
                 List<Object> result = new ArrayList<>();
                 for (int i = 0; i < eachContext.size; i++) {
-                    Object fieldBean = fieldElementClass.newInstance();
+                    Object fieldBean = fieldElementClass.getDeclaredConstructor().newInstance();
                     eachContext.deserialize(fieldBean);
                     result.add(fieldBean);
                 }
                 context.setValue(result.toArray());
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalStateException(e);
             }
         }
     };
 
     // String
-    protected EachBinder stringEachBinder = new StringEachBinder() {
+    protected final EachBinder stringEachBinder = new StringEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String jsonPath = Element.Util.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(text);
-Debug.println(Level.FINER, "jsonPath: " + jsonPath + ", string: " + text);
+logger.log(Level.TRACE, "jsonPath: " + jsonPath + ", string: " + text);
         }
     };
 
     /** */
-    private EachBinder[] eachBinders = {
+    private final EachBinder[] eachBinders = {
         booleanEachBinder,
         integerEachBinder,
         shortEachBinder,

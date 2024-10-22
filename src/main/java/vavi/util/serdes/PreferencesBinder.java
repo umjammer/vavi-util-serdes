@@ -24,14 +24,14 @@ import vavi.beans.BeanUtil;
  */
 public class PreferencesBinder implements Binder {
 
-    Preferences prefs;
+    final Preferences prefs;
 
     PreferencesBinder(Preferences prefs) {
         this.prefs = prefs;
     }
 
     // Boolean
-    protected EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
+    protected final EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -43,7 +43,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Integer
-    protected EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
+    protected final EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -55,7 +55,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Short
-    protected EachBinder shortEachBinder = new Binder.ShortEachBinder() {
+    protected final EachBinder shortEachBinder = new Binder.ShortEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -67,7 +67,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Byte
-    protected EachBinder byteEachBinder = new Binder.ByteEachBinder() {
+    protected final EachBinder byteEachBinder = new Binder.ByteEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -79,7 +79,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Long
-    protected EachBinder longEachBinder = new Binder.LongEachBinder() {
+    protected final EachBinder longEachBinder = new Binder.LongEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -91,7 +91,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Float
-    protected EachBinder floatEachBinder = new Binder.FloatEachBinder() {
+    protected final EachBinder floatEachBinder = new Binder.FloatEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -103,7 +103,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Double
-    protected EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
+    protected final EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -115,7 +115,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Character
-    protected EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
+    protected final EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
@@ -127,7 +127,7 @@ public class PreferencesBinder implements Binder {
     };
 
     // Array
-    protected EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
+    protected final EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             if (fieldElementClass.equals(Byte.TYPE)) {
@@ -145,20 +145,20 @@ public class PreferencesBinder implements Binder {
     };
 
     // String
-    protected EachBinder stringEachBinder = new Binder.StringEachBinder() {
+    protected final EachBinder stringEachBinder = new Binder.StringEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
             String fieldValue = (String) BeanUtil.getFieldValue(field, destBean);
-//Debug.println("string: " + name + ", " + prefs.get(name, fieldValue) + ", " + fieldValue + ", " + StringUtil.paramString(field));
+//logger.log(Level.TRACE, "string: " + name + ", " + prefs.get(name, fieldValue) + ", " + fieldValue + ", " + StringUtil.paramString(field));
             context.setValue(prefs.get(name, fieldValue));
         }
     };
 
     /** */
-    private EachBinder[] eachBinders = {
+    private final EachBinder[] eachBinders = {
         booleanEachBinder,
         integerEachBinder,
         shortEachBinder,

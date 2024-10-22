@@ -23,7 +23,7 @@ import java.util.Set;
 public class DateValidator extends Validator {
 
     /** collection of format strings using with {@link DateFormat} */
-    private Set<String> formats = new HashSet<>();
+    private final Set<String> formats = new HashSet<>();
 
     /**
      * @param format using with {@link DateFormat}

@@ -196,9 +196,9 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test7 test = new Test7();
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-            Serdes.Util.deserialize(is, test);
-        });
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            Serdes.Util.deserialize(is, test)
+        );
         assertTrue(e.getMessage().contains("validation"), e.getMessage());
     }
 
@@ -262,9 +262,9 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test10 test = new Test10();
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-            Serdes.Util.deserialize(is, test);
-        });
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            Serdes.Util.deserialize(is, test)
+        );
         assertTrue(e.getMessage().contains("sequence should be > 0"), e.getMessage());
     }
 
@@ -285,9 +285,9 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test11 test = new Test11();
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-            Serdes.Util.deserialize(is, test);
-        });
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            Serdes.Util.deserialize(is, test)
+        );
         assertTrue(e.getMessage().contains("duplicate sequence"), e.getMessage());
     }
 
@@ -305,9 +305,9 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
         Test12 test = new Test12();
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-            Serdes.Util.deserialize(is, test);
-        });
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            Serdes.Util.deserialize(is, test)
+        );
         assertTrue(e.getMessage().contains("sequence should be > 0"), e.getMessage());
     }
 

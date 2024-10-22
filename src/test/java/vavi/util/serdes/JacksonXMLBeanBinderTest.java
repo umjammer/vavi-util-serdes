@@ -6,8 +6,6 @@
 
 package vavi.util.serdes;
 
-import java.nio.file.Files;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.junit.jupiter.api.Test;
 

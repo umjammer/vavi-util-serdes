@@ -51,13 +51,11 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     @Override
     public DefaultIOSource getIOSource(Object... args) throws IOException {
         DefaultIOSource in = new DefaultIOSource();
-        if (args[0] instanceof InputStream) {
-            InputStream is = (InputStream) args[0];
+        if (args[0] instanceof InputStream is) {
             in.bedis = new DataInputStream(is);
             in.ledis = new LittleEndianDataInputStream(is);
             in.available = is.available();
-        } else if (args[0] instanceof SeekableByteChannel) {
-            SeekableByteChannel sbc = (SeekableByteChannel) args[0];
+        } else if (args[0] instanceof SeekableByteChannel sbc) {
             in.bedis = new SeekableDataInputStream(sbc);
             in.ledis = new LittleEndianSeekableDataInputStream(sbc);
             in.available = (int) (sbc.size() - sbc.position());
@@ -73,22 +71,22 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         DataInput bedis;
         LittleEndianDataInput ledis;
         DataInput defaultDis;
-        DataInput get(boolean isBigedian) {
-            return isBigedian ? bedis : ledis;
+        DataInput get(boolean isBigendian) {
+            return isBigendian ? bedis : ledis;
         }
         int available;
     }
 
     /** not thread safe, should be public for script engine */
     public static class DefaultContext implements BeanBinder.Context {
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("beanshell");
-        Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        final ScriptEngineManager manager = new ScriptEngineManager();
+        final ScriptEngine engine = manager.getEngineByName("beanshell");
+        final Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 
-        DefaultIOSource in;
-        List<Field> fields;
-        Object bean;
-        DefaultBeanBinder beanBinder;
+        final DefaultIOSource in;
+        final List<Field> fields;
+        final Object bean;
+        final DefaultBeanBinder beanBinder;
 
         DefaultContext(IOSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
             this.in = (DefaultIOSource) in;
@@ -127,9 +125,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
 
     /** */
     protected static class DefaultEachContext implements Binder.EachContext {
-        public int sequence;
-        DefaultContext context;
-        Field field;
+        public final int sequence;
+        final DefaultContext context;
+        final Field field;
 
         public Object value;
         public int size;
@@ -143,7 +141,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             this.value = value;
         }
 
-        DataInput dis;
+        final DataInput dis;
 
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;

@@ -41,11 +41,9 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
      */
     @Override
     public Object deserialize(Object io, Object destBean) throws IOException {
-        if (io instanceof String) {
-            String string = (String) io;
+        if (io instanceof String string) {
             return xmlMapper.readValue(string, destBean.getClass());
-        } else if (io instanceof InputStream) {
-            InputStream is = (InputStream) io;
+        } else if (io instanceof InputStream is) {
             return xmlMapper.readValue(is, destBean.getClass());
         } else {
             throw new IllegalArgumentException("unsupported class: " + io.getClass().getName());
@@ -60,8 +58,7 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
     public Object serialize(Object destBean, Object io) throws IOException {
         if (io instanceof String) {
             return xmlMapper.writeValueAsString(destBean);
-        } else if (io instanceof OutputStream) {
-            OutputStream os = (OutputStream) io;
+        } else if (io instanceof OutputStream os) {
             xmlMapper.writeValue(os, destBean);
             return io;
         } else {

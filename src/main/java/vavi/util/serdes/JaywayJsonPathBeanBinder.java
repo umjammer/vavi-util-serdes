@@ -9,9 +9,10 @@ package vavi.util.serdes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
-import vavi.util.Debug;
+import static java.lang.System.getLogger;
 
 
 /**
@@ -22,6 +23,8 @@ import vavi.util.Debug;
  */
 public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBeanBinder.NullIOSource> {
 
+    private static final Logger logger = getLogger(JaywayJsonPathBeanBinder.class.getName());
+
     String source;
 
     static class NullIOSource implements BeanBinder.IOSource {
@@ -30,9 +33,8 @@ public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBea
     @Override
     public NullIOSource getIOSource(Object... args) throws IOException {
         NullIOSource io = new NullIOSource();
-        if (args[0] instanceof InputStream) {
+        if (args[0] instanceof InputStream is) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            InputStream is = (InputStream) args[0];
             byte[] b = new byte[8192];
             while (true) {
                 int r = is.read(b);
@@ -40,7 +42,7 @@ public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBea
                 baos.write(b, 0, r);
             }
             source = baos.toString();
-Debug.println(Level.FINE, "source: " + source);
+logger.log(Level.DEBUG, "source: " + source);
         } else {
             throw new IllegalArgumentException("unsupported class: " + args[0].getClass().getName());
         }

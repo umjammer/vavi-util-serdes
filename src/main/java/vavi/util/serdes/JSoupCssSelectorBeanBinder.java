@@ -30,8 +30,7 @@ public class JSoupCssSelectorBeanBinder extends SimpleBeanBinder<JSoupCssSelecto
     @Override
     public NullIOSource getIOSource(Object... args) throws IOException {
         NullIOSource io = new NullIOSource();
-        if (args[0] instanceof InputStream) {
-            InputStream is = (InputStream) args[0];
+        if (args[0] instanceof InputStream is) {
             document = Jsoup.parse(is, StandardCharsets.UTF_8.name(), "");
         } else {
             throw new IllegalArgumentException("unsupported class: " + args[0].getClass().getName());

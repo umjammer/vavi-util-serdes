@@ -27,16 +27,16 @@ import vavi.util.serdes.Binder.EachContext;
 public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinder<T> {
 
     protected static class SimpleContext<U> implements BeanBinder.Context {
-        public U in;
+        public final U in;
         SimpleContext(U in, List<Field> fields, Object bean) {
             this.in = in;
         }
     }
 
     public class SimpleEachContext implements Binder.EachContext {
-        int sequence;
-        Field field;
-        public SimpleContext<T> context;
+        final int sequence;
+        final Field field;
+        public final SimpleContext<T> context;
         @SuppressWarnings("unchecked")
         SimpleEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;

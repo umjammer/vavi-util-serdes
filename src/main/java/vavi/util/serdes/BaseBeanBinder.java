@@ -7,15 +7,17 @@
 package vavi.util.serdes;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.serdes.BeanBinder.IOSource;
 import vavi.util.serdes.Binder.EachContext;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -28,6 +30,8 @@ import vavi.util.serdes.Binder.EachContext;
  * @version 0.00 2022/02/26 umjammer initial version <br>
  */
 public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T> {
+
+    private static final Logger logger = getLogger(BaseBeanBinder.class.getName());
 
     /** called multiple times, should be optimized */
     protected abstract Binder getDefaultBinder();
@@ -74,7 +78,7 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
             String condition = Element.Util.getCondition(field);
             if (!condition.isEmpty()) {
                 if (!eachContext.condition(condition)) {
-Debug.println(Level.FINE, "condition check is false");
+logger.log(Level.DEBUG, "condition check is false");
                     continue;
                 }
             }
@@ -84,9 +88,9 @@ Debug.println(Level.FINE, "condition check is false");
             if (Bound.Util.isBound(field)) {
                 binder = Bound.Util.getBinder(field);
             }
-Debug.println(Level.FINER, "binder: " + binder.getClass().getName());
+logger.log(Level.TRACE, "binder: " + binder.getClass().getName());
             binder.bind(eachContext, destBean, field);
-Debug.println(Level.FINE, field.getName() + ": " + field.getType() + ", " + eachContext);
+logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachContext);
             eachContext.settleValues();
 
             // validation

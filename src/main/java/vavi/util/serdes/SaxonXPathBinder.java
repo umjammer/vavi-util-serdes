@@ -8,11 +8,13 @@ package vavi.util.serdes;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -21,7 +23,8 @@ import javax.xml.xpath.XPathFactory;
 import net.sf.saxon.om.NodeInfo;
 import org.xml.sax.InputSource;
 import vavi.beans.BeanUtil;
-import vavi.util.Debug;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -35,31 +38,33 @@ import vavi.util.Debug;
  */
 public class SaxonXPathBinder implements Binder {
 
+    private static final Logger logger = getLogger(SaxonXPathBinder.class.getName());
+
     private static final String JAXP_KEY_XPF = XPathFactory.DEFAULT_PROPERTY_NAME + ":" + XPathFactory.DEFAULT_OBJECT_MODEL_URI;
     private static final String JAXP_VALUE_XPF_SAXON = "net.sf.saxon.xpath.XPathFactoryImpl";
 
     /** */
-    private XPath xPath;
+    private final XPath xPath;
 
     {
         String backup = System.setProperty(JAXP_KEY_XPF, JAXP_VALUE_XPF_SAXON);
         System.setProperty(JAXP_KEY_XPF, JAXP_VALUE_XPF_SAXON);
         XPathFactory factory = XPathFactory.newInstance();
         assert factory.getClass().getName().equals(JAXP_VALUE_XPF_SAXON) : "not saxon factory: " + factory.getClass().getName();
-Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
+logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
         xPath = factory.newXPath();
         if (backup != null)
             System.setProperty(JAXP_KEY_XPF, backup);
     }
 
-    private String source;
+    private final String source;
 
     SaxonXPathBinder(String source) {
         this.source = source;
     }
 
     // Boolean
-    protected EachBinder booleanEachBinder = new BooleanEachBinder() {
+    protected final EachBinder booleanEachBinder = new BooleanEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -72,7 +77,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Integer
-    protected EachBinder integerEachBinder = new IntegerEachBinder() {
+    protected final EachBinder integerEachBinder = new IntegerEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -85,7 +90,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Short
-    protected EachBinder shortEachBinder = new ShortEachBinder() {
+    protected final EachBinder shortEachBinder = new ShortEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -98,7 +103,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Byte
-    protected EachBinder byteEachBinder = new ByteEachBinder() {
+    protected final EachBinder byteEachBinder = new ByteEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -111,7 +116,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Long
-    protected EachBinder longEachBinder = new LongEachBinder() {
+    protected final EachBinder longEachBinder = new LongEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -124,7 +129,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Float
-    protected EachBinder floatEachBinder = new FloatEachBinder() {
+    protected final EachBinder floatEachBinder = new FloatEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -137,7 +142,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Double
-    protected EachBinder doubleEachBinder = new DoubleEachBinder() {
+    protected final EachBinder doubleEachBinder = new DoubleEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -150,7 +155,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Character
-    protected EachBinder characterEachBinder = new CharacterEachBinder() {
+    protected final EachBinder characterEachBinder = new CharacterEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
@@ -163,7 +168,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
     };
 
     // Array
-    protected EachBinder arrayEachBinder = new ArrayEachBinder() {
+    protected final EachBinder arrayEachBinder = new ArrayEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             DefaultBeanBinder.DefaultEachContext eachContext = (DefaultBeanBinder.DefaultEachContext) context;
@@ -172,7 +177,7 @@ Debug.println(Level.FINE, "XPathFactory: " + factory.getClass().getName());
                 eachContext.size = Array.getLength(fieldValue);
             }
             String sizeScript = Element.Util.getValue(field);
-Debug.println(Level.FINER, sizeScript);
+logger.log(Level.TRACE, sizeScript);
             if (!sizeScript.isEmpty()) {
                 eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
             }
@@ -189,29 +194,30 @@ Debug.println(Level.FINER, sizeScript);
                 Object nodeSet = xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.NODESET);
                 @SuppressWarnings("unchecked")
                 List<NodeInfo> nodeList = (List<NodeInfo>) nodeSet;
-if (nodeList.size() == 0) {
- Debug.println(Level.WARNING, "no node list: " + xpath);
+if (nodeList.isEmpty()) {
+ logger.log(Level.WARNING, "no node list: " + xpath);
 }
                 List<Object> result = new ArrayList<>();
                 for (int i = 0; i < eachContext.size; i++) {
-                    Object fieldBean = fieldElementClass.newInstance();
+                    Object fieldBean = fieldElementClass.getDeclaredConstructor().newInstance();
                     eachContext.deserialize(fieldBean);
                     result.add(fieldBean);
                 }
                 context.setValue(result.toArray());
-            } catch (InstantiationException | IllegalAccessException | XPathExpressionException e) {
+            } catch (InstantiationException | IllegalAccessException | XPathExpressionException |
+                     NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalStateException(e);
             }
         }
     };
 
     // String
-    protected EachBinder stringEachBinder = new StringEachBinder() {
+    protected final EachBinder stringEachBinder = new StringEachBinder() {
         public void bind(EachContext context, Object destBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
-Debug.println(Level.FINER, "xpath: " + xpath + ", string: " + text);
+logger.log(Level.TRACE, "xpath: " + xpath + ", string: " + text);
                 context.setValue(text);
             } catch (XPathExpressionException e) {
                 throw new IllegalStateException(e);
@@ -220,7 +226,7 @@ Debug.println(Level.FINER, "xpath: " + xpath + ", string: " + text);
     };
 
     /** */
-    private EachBinder[] eachBinders = {
+    private final EachBinder[] eachBinders = {
         booleanEachBinder,
         integerEachBinder,
         shortEachBinder,

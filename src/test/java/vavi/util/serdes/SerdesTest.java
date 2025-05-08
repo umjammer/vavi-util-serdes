@@ -501,7 +501,7 @@ Debug.println(test.bl);
     static class Test20 {
         @Element(sequence = 1)
         int size;
-        @Element(sequence = 2, value = "$1")
+        @Element(sequence = 2, value = "$1") // $1 means field size
         List<Test20_Child> chldren = new ArrayList<>();
     }
 
@@ -521,5 +521,63 @@ Debug.println(test.bl);
 Debug.println(test.chldren);
         assertEquals(100, test.chldren.get(0).child);
         assertEquals(300, test.chldren.get(2).child);
+    }
+
+    @Serdes
+    static class Test21 {
+        @Element(sequence = 1, value = "byte")
+        int value;
+    }
+
+    @Test
+    @DisplayName("'value' usage for int type")
+    void test21() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(-21);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test21 test = new Test21();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(-21, test.value);
+    }
+
+    @Serdes
+    static class Test22 {
+        @Element(sequence = 1, validation = "new byte[] {'s', 'a', 'n', 'o'}")
+        byte[] b = new byte[4]; // needs instance array
+    }
+
+    @Test
+    @DisplayName("byte array validation")
+    void test22() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write("sano".getBytes());
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test22 test = new Test22();
+        Serdes.Util.deserialize(is, test);
+        assertArrayEquals(baos.toByteArray(), test.b);
+    }
+
+    @Serdes
+    static class Test23 {
+        @Element(sequence = 1, validation = "$0") // $0 means size of Test23
+        int size;
+        @Element(sequence = 2)
+        byte[] b = new byte[3];
+    }
+
+    @Test
+    @DisplayName("sizeof")
+    void test23() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(4 + 3));
+        baos.write("abc".getBytes());
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        Test23 test = new Test23();
+        Serdes.Util.deserialize(is, test);
+        assertEquals(4 + 3, test.size);
+        assertArrayEquals("abc".getBytes(), test.b);
     }
 }

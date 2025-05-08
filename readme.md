@@ -52,9 +52,7 @@
 
  * validation
  * condition
- * more
-
-    https://github.com/umjammer/vavi-util-binaryio/blob/master/src/test/java/vavi/util/serdes/SerdesTest.java
+ * more ... https://github.com/umjammer/vavi-util-binaryio/blob/master/src/test/java/vavi/util/serdes/SerdesTest.java
 
 ### Binders
 
@@ -96,3 +94,12 @@
    * [jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
  * read write xml by jaxp document
    * see vavi-apps-ebook:EpubManipulator
+ * bits operation
+```java
+   @BitElement(sequence = 1, value = "****....")
+   int a;
+   @BitElement(sequence = 2, value = "....**..")
+   int b;
+   @BitElement(sequence = 3, value = "......**|**......")
+   int c;
+```

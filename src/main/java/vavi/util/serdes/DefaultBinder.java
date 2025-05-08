@@ -105,7 +105,10 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
-            if (type.equalsIgnoreCase("unsigned byte")) {
+            if (type.equalsIgnoreCase("byte")) {
+                context.setValue(eachContext.dis.readByte());
+                eachContext.size = 1;
+            } else if (type.equalsIgnoreCase("unsigned byte")) {
                 context.setValue(eachContext.dis.readUnsignedByte());
                 eachContext.size = 1;
             } else if (type.equalsIgnoreCase("unsigned short")) {

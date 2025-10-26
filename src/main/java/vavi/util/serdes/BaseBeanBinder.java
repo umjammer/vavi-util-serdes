@@ -102,7 +102,7 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
     }
 
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object srcBean, Object io) throws IOException {
         throw new UnsupportedOperationException("not implemented yet");
     }
 

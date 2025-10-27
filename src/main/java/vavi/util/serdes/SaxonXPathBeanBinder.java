@@ -50,7 +50,7 @@ logger.log(Level.DEBUG, "source: " + source);
     }
 
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object srcBean, Object io) throws IOException {
         throw new UnsupportedOperationException();
     }
 

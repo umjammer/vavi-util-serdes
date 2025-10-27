@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import vavi.test.box.Box;
 import vavi.util.ByteUtil;
 import vavi.util.Debug;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -579,5 +580,29 @@ Debug.println(test.chldren);
         Serdes.Util.deserialize(is, test);
         assertEquals(4 + 3, test.size);
         assertArrayEquals("abc".getBytes(), test.b);
+    }
+
+    @Serdes
+    public static class TestSerializeBean {
+        @Element(sequence = 1)
+        private int id = 99;
+
+        @Element(sequence = 2, value = "9") // value is byte length for String
+        private String name = "test-bean";
+    }
+
+    @Test
+    @DisplayName("serialize")
+    void testSerialize() throws Exception {
+        TestSerializeBean bean = new TestSerializeBean();
+        ByteArrayOutputStream actualBaos = new ByteArrayOutputStream();
+
+        Serdes.Util.serialize(bean, actualBaos);
+
+        ByteArrayOutputStream expectedBaos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(expectedBaos);
+        dos.writeInt(99);
+        dos.write("test-bean".getBytes());
+        assertArrayEquals(expectedBaos.toByteArray(), actualBaos.toByteArray());
     }
 }

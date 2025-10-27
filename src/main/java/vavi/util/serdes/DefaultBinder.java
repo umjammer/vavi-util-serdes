@@ -80,6 +80,12 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readBoolean());
             eachContext.size = 1;
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeBoolean((boolean) context.getValue());
+        }
     };
 
     // Byte
@@ -89,6 +95,13 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readByte());
             eachContext.size = 1;
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeByte((byte) context.getValue());
+            eachContext.size = 1;
+        }
     };
 
     // Short
@@ -96,6 +109,13 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readShort());
+            eachContext.size = 2;
+        }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeShort((short) context.getValue());
             eachContext.size = 2;
         }
     };
@@ -119,6 +139,13 @@ public class DefaultBinder implements Binder {
                 eachContext.size = 4;
             }
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeInt((int) context.getValue());
+            eachContext.size = 4;
+        }
     };
 
     // Long, value=type ("unsigned int"|empty)
@@ -134,6 +161,13 @@ public class DefaultBinder implements Binder {
                 eachContext.size = 8;
             }
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeLong((long) context.getValue());
+            eachContext.size = 8;
+        }
     };
 
     // Float
@@ -141,6 +175,13 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readFloat());
+            eachContext.size = 4;
+        }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeFloat((float) context.getValue());
             eachContext.size = 4;
         }
     };
@@ -152,6 +193,13 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readDouble());
             eachContext.size = 8;
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeDouble((double) context.getValue());
+            eachContext.size = 8;
+        }
     };
 
     // Character
@@ -159,6 +207,13 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readChar());
+            eachContext.size = 2;
+        }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeChar((char) context.getValue());
             eachContext.size = 2;
         }
     };
@@ -252,6 +307,80 @@ logger.log(Level.TRACE, sizeScript);
                 }
             }
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            Object fieldValue = context.getValue();
+            if (fieldValue != null) {
+                eachContext.size = Array.getLength(fieldValue);
+            }
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+
+            Class<?> fieldElementClass = field.getType().getComponentType();
+            if (fieldElementClass.equals(Byte.TYPE)) {
+                // byte array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeByte(((byte[]) fieldValue)[i]);
+                    }
+                } else {
+                    byte[] buf = new byte[eachContext.size];
+                    eachContext.dos.write(buf, 0, eachContext.size);
+                }
+            } else if (fieldElementClass.equals(Short.TYPE)) {
+                // short array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(((short[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Integer.TYPE)) {
+                // int array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(((int[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Long.TYPE)) {
+                // long array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(((long[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(0);
+                    }
+                }
+            } else {
+                // object array
+                Serdes annotation = fieldElementClass.getAnnotation(Serdes.class);
+                if (annotation == null) {
+                    throw new UnsupportedOperationException("use @Bound: " + fieldElementClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+                }
+                if (fieldValue == null) {
+                    fieldValue = Array.newInstance(fieldElementClass, eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    Object fieldBean = Array.get(fieldValue, i);
+                    eachContext.serialize(fieldBean);
+                }
+            }
+        }
     };
 
     // List, value=script for size
@@ -327,6 +456,80 @@ logger.log(Level.TRACE, sizeScript);
                 }
             }
         }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            Object fieldValue = context.getValue();
+            if (fieldValue != null) {
+                eachContext.size = ((List) fieldValue).size();
+            }
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+
+            Class<?> fieldElementClass = field.getType().getComponentType();
+            if (fieldElementClass.equals(Byte.TYPE)) {
+                // byte list
+                if (fieldValue != null) {
+                    for (byte b : (List<Byte>) fieldValue) {
+                        eachContext.dos.writeByte(b);
+                    }
+                } else {
+                    byte[] buf = new byte[eachContext.size];
+                    eachContext.dos.write(buf, 0, eachContext.size);
+                }
+            } else if (fieldElementClass.equals(Short.TYPE)) {
+                // short list
+                if (fieldValue != null) {
+                    for (short s : (List<Short>) fieldValue) {
+                        eachContext.dos.writeShort(s);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Integer.TYPE)) {
+                // int list
+                if (fieldValue != null) {
+                    for (int i : (List<Integer>) fieldValue) {
+                        eachContext.dos.writeInt(i);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Long.TYPE)) {
+                // long list
+                if (fieldValue != null) {
+                    for (long l : (List<Long>) fieldValue) {
+                        eachContext.dos.writeLong(l);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(0);
+                    }
+                }
+            } else {
+                // object list
+                Serdes annotation = fieldElementClass.getAnnotation(Serdes.class);
+                if (annotation == null) {
+                    throw new UnsupportedOperationException("use @Bound: " + fieldElementClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+                }
+                if (fieldValue == null) {
+                    fieldValue = Array.newInstance(fieldElementClass, eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    Object fieldBean = Array.get(fieldValue, i);
+                    eachContext.serialize(fieldBean);
+                }
+            }
+        }
     };
 
     // String, value=script for size
@@ -352,6 +555,29 @@ logger.log(Level.DEBUG, encoding);
             } else {
 logger.log(Level.DEBUG, () -> "no encoding: " + bytes.length + " bytes\n" + StringUtil.getDump(bytes));
                 context.setValue(new String(bytes));
+            }
+        }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.size = ((String) context.getValue()).length();
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+            String encoding = Element.Util.getEncoding(field);
+            if (encoding.isEmpty()) {
+                encoding = Serdes.Util.encoding(srcBean);
+            }
+            if (!encoding.isEmpty()) {
+logger.log(Level.DEBUG, encoding);
+                eachContext.dos.write(((String) context.getValue()).getBytes(Charset.forName(encoding)));
+            } else {
+logger.log(Level.DEBUG, () -> "no encoding: " + field.getName());
+                eachContext.dos.write(((String) context.getValue()).getBytes());
             }
         }
     };
@@ -426,12 +652,41 @@ logger.log(Level.TRACE, "invokeValueMethod: " + enumType + ", " + enumObject + "
             Class<?> enumValueType = enumValueType(field.getType());
             if (enumValueType == Void.TYPE) {
                 eachContext.setValue(getEnum(field.getType(), e -> e.ordinal() == (Integer) value));
+                eachContext.size = 2;
             } else if (enumValueType == Integer.TYPE) {
                 // TODO fixed getter method name "getValue"
                 eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+                eachContext.size = 4;
             } else if (enumValueType == Long.TYPE) {
                 // TODO fixed getter method name "getValue"
                 eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+                eachContext.size = 8;
+            } else if (enumValueType == String.class) {
+                // TODO not implemented yet
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            } else {
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            }
+        }
+
+        @Override
+        public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
+            // TODO fixed default value type "unsigned short"
+            Object value = read(eachContext, !type.isEmpty() ? type : "unsigned short");
+            Class<?> enumValueType = enumValueType(field.getType());
+            if (enumValueType == Void.TYPE) {
+                eachContext.dos.writeShort(((Enum<?>) eachContext.getValue()).ordinal());
+                eachContext.size = 2;
+            } else if (enumValueType == Integer.TYPE) {
+                // TODO fixed getter method name "getValue"
+                eachContext.dos.writeInt((Integer) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                eachContext.size = 4;
+            } else if (enumValueType == Long.TYPE) {
+                // TODO fixed getter method name "getValue"
+                eachContext.dos.writeLong((Long) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                eachContext.size = 8;
             } else if (enumValueType == String.class) {
                 // TODO not implemented yet
                 throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");

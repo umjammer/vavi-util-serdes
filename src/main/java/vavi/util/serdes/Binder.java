@@ -25,7 +25,12 @@ public interface Binder {
 
     interface EachBinder {
         boolean matches(Class<?> fieldClass);
+        /** for deserializing */
         void bind(EachContext context, Object destBean, Field field) throws IOException;
+        /** for serializing */
+        default void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            // TODO remove and impl in sub class
+        };
     }
 
     // Boolean
@@ -129,6 +134,18 @@ public interface Binder {
                 throw new IllegalStateException(e);
             }
         }
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            try {
+                Object fieldValue = BeanUtil.getFieldValue(field, srcBean);
+                if (fieldValue == null) {
+                    fieldValue = field.getType().getDeclaredConstructor().newInstance();
+                }
+                context.serialize(fieldValue);
+                context.setValue(fieldValue);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     };
 
     /**
@@ -151,6 +168,26 @@ public interface Binder {
         BeanUtil.setFieldValue(field, destBean, context.getValue());
     }
 
+    /**
+     * @throws IllegalArgumentException when eval failed
+     * @throws UnsupportedOperationException float, double, char
+     */
+    default void bind(Object srcBean, Field field, EachContext context) throws IOException {
+        context.setValue(BeanUtil.getFieldValue(field, srcBean));
+
+        Class<?> fieldClass = field.getType();
+        Optional<EachBinder> eb = Arrays.stream(getEachBinders()).filter(b -> b.matches(fieldClass)).findFirst();
+        if (eb.isPresent()) {
+            eb.get().bind(srcBean, field, context);
+        } else {
+            if (defaultEachBinder.matches(fieldClass)) {
+                defaultEachBinder.bind(srcBean, field, context);
+            } else {
+                throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            }
+        }
+    }
+
     /** */
     interface EachContext {
 
@@ -171,6 +208,8 @@ public interface Binder {
          * recursion
          */
         void deserialize(Object fieldValue) throws IOException;
+
+        void serialize(Object fieldValue) throws IOException;
 
         /**
          * finalization (sets values to {@link vavi.util.serdes.BeanBinder.Context} etc.)

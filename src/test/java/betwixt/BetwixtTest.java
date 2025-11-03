@@ -9,6 +9,7 @@ package betwixt;
 import java.io.File;
 
 import org.apache.commons.betwixt.io.BeanReader;
+import vavi.util.Debug;
 
 
 /**
@@ -28,11 +29,11 @@ public class BetwixtTest {
         reader.registerBeanClass(CsvFormat.class);
         CsvFormat bean = (CsvFormat) reader.parse(new File(args[0]));
 
-        System.err.println("bean: " + bean);
-        System.err.println("count: " + bean.getCount());
-        System.err.println("validators: " + bean.getValidators().size());
+Debug.println("bean: " + bean);
+Debug.println("count: " + bean.getCount());
+Debug.println("validators: " + bean.getValidators().size());
         for (Validator validator : bean.getValidators()) {
-            System.err.println("validator: " + validator);
+Debug.println("validator: " + validator);
         }
     }
 }

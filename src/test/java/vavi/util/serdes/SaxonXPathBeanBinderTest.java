@@ -6,6 +6,8 @@
 
 package vavi.util.serdes;
 
+import vavi.util.Debug;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,14 +29,14 @@ class SaxonXPathBeanBinderTest {
 
     @Test
     void test() throws Exception {
-//System.err.println("---- source ----");
+//Debug.println("---- source ----");
 //new PrettyPrinter(System.err).print(new InputSource(SaxonXPathBeanBinderTest.class.getResourceAsStream("/container.xml")));
-//System.err.println("---- xpath ----");
-//XPathDebugger.getEntryList(new InputSource(SaxonXPathBeanBinderTest.class.getResourceAsStream("/container.xml"))).forEach(System.err::println);
+//Debug.println("---- xpath ----");
+//XPathDebugger.getEntryList(new InputSource(SaxonXPathBeanBinderTest.class.getResourceAsStream("/container.xml"))).forEach(Debug::println);
 
         Test1 test = new Test1();
         Serdes.Util.deserialize(SaxonXPathBeanBinderTest.class.getResourceAsStream("/container.xml"), test);
-System.err.println(test.fillPath);
+Debug.println(test.fillPath);
         assertEquals("item/standard.opf", test.fillPath);
     }
 }

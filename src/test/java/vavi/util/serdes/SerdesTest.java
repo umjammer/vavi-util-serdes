@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SerdesTest {
 
     @Test
+    @DisplayName("Box injection")
     void test() throws Exception {
         InputStream is = SerdesTest.class.getResourceAsStream("/sample4.m4a");
         Box box = new Box();
@@ -50,6 +51,7 @@ class SerdesTest {
     }
 
     @Test
+    @DisplayName("constraint by value")
     void test2() throws Exception {
         InputStream is = new ByteArrayInputStream("Hello my name is Naohide.".getBytes());
         Test2 test = new Test2();
@@ -66,6 +68,7 @@ class SerdesTest {
     }
 
     @Test
+    @DisplayName("big/little endian mixture")
     void test3() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(ByteUtil.getBeBytes(0xfedcba98));
@@ -84,7 +87,7 @@ class SerdesTest {
         int i1;
         @Serdes
         static class Test4_Child { // nested class definition
-            @Element(sequence = 1)
+            @Element(sequence = 1) // sequence is independent of the container class
             int i1;
         }
         @Element(sequence = 2)
@@ -92,6 +95,7 @@ class SerdesTest {
     }
 
     @Test
+    @DisplayName("nested class")
     void test4() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(ByteUtil.getBeBytes(0x12345678));
@@ -121,6 +125,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
+    @DisplayName("condition method call")
     void test5() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(ByteUtil.getBeBytes(2));
@@ -170,6 +175,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
+    @DisplayName("validation")
     void test6() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(ByteUtil.getBeBytes(6));
@@ -191,6 +197,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
+    @DisplayName("validation error")
     void test7() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(ByteUtil.getBeBytes(7)); // validation error
@@ -205,16 +212,18 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
 
     @Serdes
     static class Test8S {
-        @Element(sequence = 1, value= "5", validation = "\"Super\"")
+        @Element(sequence = 1, value= "5", validation = "\"Super\"") // sequence is must be unique among this class and super classes and subclasses
         String s1;
     }
 
+    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder#validateSequences} */
     static class Test8 extends Test8S {
-        @Element(sequence = 2, value = "3", validation = "\"Sub\"")
+        @Element(sequence = 2, value = "3", validation = "\"Sub\"") // sequence is must be unique among this class and super classes and subclasses
         String s2;
     }
 
     @Test
+    @DisplayName("super class element")
     void test8() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write("Super".getBytes());
@@ -236,6 +245,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
+    @DisplayName("array")
     void test9() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < 18; i++) {
@@ -277,6 +287,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         int i2;
     }
 
+    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder#validateSequences} */
     @Test
     @DisplayName("duplicate sequence")
     void test11() throws Exception {
@@ -583,7 +594,7 @@ Debug.println(test.chldren);
     }
 
     @Serdes
-    public static class TestSerializeBean {
+    public static class Test24 {
         @Element(sequence = 1)
         private int id = 99;
 
@@ -593,16 +604,39 @@ Debug.println(test.chldren);
 
     @Test
     @DisplayName("serialize")
-    void testSerialize() throws Exception {
-        TestSerializeBean bean = new TestSerializeBean();
-        ByteArrayOutputStream actualBaos = new ByteArrayOutputStream();
+    void test24() throws Exception {
+        Test24 bean = new Test24();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        Serdes.Util.serialize(bean, actualBaos);
+        Serdes.Util.serialize(bean, baos);
 
         ByteArrayOutputStream expectedBaos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(expectedBaos);
         dos.writeInt(99);
         dos.write("test-bean".getBytes());
-        assertArrayEquals(expectedBaos.toByteArray(), actualBaos.toByteArray());
+        assertArrayEquals(expectedBaos.toByteArray(), baos.toByteArray());
+    }
+
+    @Serdes
+    public static class Test25 {
+        public enum A {
+            A1, A2
+        }
+        @Element(sequence = 1, value = "int")
+        A enumA = A.A2;
+    }
+
+    @Test
+    @DisplayName("serialize: enum")
+    void test25() throws Exception {
+        Test25 bean = new Test25();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        Serdes.Util.serialize(bean, baos);
+
+        ByteArrayOutputStream expectedBaos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(expectedBaos);
+        dos.writeInt(Test25.A.A2.ordinal());
+        assertArrayEquals(expectedBaos.toByteArray(), baos.toByteArray());
     }
 }

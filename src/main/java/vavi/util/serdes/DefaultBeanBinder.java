@@ -28,6 +28,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import vavi.beans.BeanUtil;
 import vavi.io.LittleEndianDataInput;
 import vavi.io.LittleEndianDataInputStream;
 import vavi.io.LittleEndianDataOutput;
@@ -86,7 +87,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     protected static class DefaultInputSource implements DefaultIOSource {
         DataInput bedis;
         LittleEndianDataInput ledis;
+        /** {@link Element#bigEndian()} considerable DataInput */
         DataInput defaultDis;
+        /** {@link Element#bigEndian()} considerable DataInput */
         DataInput get(boolean isBigendian) {
             return isBigendian ? bedis : ledis;
         }
@@ -97,7 +100,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     protected static class DefaultOutputSource implements DefaultIOSource {
         DataOutput bedos;
         LittleEndianDataOutput ledos;
+        /** {@link Element#bigEndian()} considerable DataOutput */
         DataOutput defaultDos;
+        /** {@link Element#bigEndian()} considerable DataOutput */
         DataOutput get(boolean isBigendian) {
             return isBigendian ? bedos : ledos;
         }
@@ -114,6 +119,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         final Object bean;
         final DefaultBeanBinder beanBinder;
 
+        /** for deserializing */
         DefaultContext(DefaultInputSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
             this.io = in;
             this.fields = fields;
@@ -123,7 +129,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             validateSequences(fields);
 
             try {
-                bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length
+                bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length TODO available is not object length but stream length
                 String prepare = "import static " + getClass().getName() + ".*;";
                 engine.eval(prepare);
             } catch (ScriptException e) {
@@ -131,6 +137,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             }
         }
 
+        /** for serializing */
         DefaultContext(DefaultOutputSource out, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
             this.io = out;
             this.fields = fields;
@@ -165,7 +172,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
     }
 
-    /** */
+    /** context for each field */
     protected static class DefaultEachContext implements EachContext {
         public final int sequence;
         final DefaultContext context;
@@ -183,7 +190,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             this.value = value;
         }
 
+        /** {@link Element#bigEndian()} considerable DataInput */
         DataInput dis;
+        /** {@link Element#bigEndian()} considerable DataOutput */
         DataOutput dos;
 
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
@@ -270,7 +279,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         @Override
         public boolean condition(String condition) {
             try {
-                Method method = context.bean.getClass().getDeclaredMethod(condition, Integer.TYPE);
+                Method method = BeanUtil.getMethodByNameOf(context.bean.getClass(), condition, Integer.TYPE);
                 return (boolean) method.invoke(context.bean, sequence);
             } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new IllegalArgumentException(e);

@@ -122,11 +122,6 @@ public class JaywayJsonPathBinder implements Binder {
             if (fieldValue != null) {
                 eachContext.size = Array.getLength(fieldValue);
             }
-            String sizeScript = Element.Util.getValue(field);
-logger.log(Level.TRACE, sizeScript);
-            if (!sizeScript.isEmpty()) {
-                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
-            }
 
             // object array
             // TODO exclude primitives and base classes

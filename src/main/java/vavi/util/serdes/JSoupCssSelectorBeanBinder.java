@@ -39,7 +39,7 @@ public class JSoupCssSelectorBeanBinder extends SimpleBeanBinder<JSoupCssSelecto
     }
 
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object srcBean, Object io) throws IOException {
         throw new UnsupportedOperationException();
     }
 

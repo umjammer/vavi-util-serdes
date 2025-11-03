@@ -10,6 +10,7 @@ import java.io.File;
 
 import org.apache.commons.betwixt.io.BeanReader;
 
+import vavi.util.Debug;
 import vavi.util.serdes.Serdes;
 
 
@@ -31,6 +32,6 @@ public class SerdestTest {
 
         Serdes bean = (Serdes) reader.parse(new File(args[0]));
 
-        System.err.println("bean: " + bean);
+Debug.println("bean: " + bean);
     }
 }

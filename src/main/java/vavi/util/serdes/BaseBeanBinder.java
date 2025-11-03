@@ -102,8 +102,54 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
     }
 
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
-        throw new UnsupportedOperationException("not implemented yet");
+    public Object serialize(Object srcBean, Object io) throws IOException {
+        T out = getIOSource(io, Serdes.Util.isBigEndian(srcBean));
+        serialize0(srcBean, out);
+        return io;
+    }
+
+    /**
+     * <ol>
+     * <li>retrieve fields which has {@link Element}
+     * <li>check condition
+     * <li>do extraction
+     * </ol>
+     */
+    protected void serialize0(Object srcBean, T out) throws IOException {
+        Serdes.Util.getAnnotation(srcBean);
+
+        // list up fields
+        List<Field> elementFields = Serdes.Util.getElementFields(srcBean);
+
+        // extraction
+        Context context = getContext(out, elementFields, srcBean);
+
+        for (Field field : elementFields) {
+
+            int sequence = Element.Util.getSequence(field);
+
+            // each endian
+            Boolean bigEndian = Element.Util.isBigEndian(field);
+            EachContext eachContext = getEachContext(sequence, bigEndian, field, context);
+
+            // condition
+            String condition = Element.Util.getCondition(field);
+            if (!condition.isEmpty()) {
+                if (!eachContext.condition(condition)) {
+                    logger.log(Level.DEBUG, "condition check is false");
+                    continue;
+                }
+            }
+
+            // each extraction
+            Binder binder = getDefaultBinder();
+            if (Bound.Util.isBound(field)) {
+                binder = Bound.Util.getBinder(field);
+            }
+logger.log(Level.TRACE, "binder: " + binder.getClass().getName());
+            binder.bind(srcBean, field, eachContext);
+logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachContext);
+        }
     }
 
     /** @throws IllegalArgumentException validation failed */

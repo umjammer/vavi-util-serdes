@@ -80,6 +80,11 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readBoolean());
             eachContext.size = 1;
         }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeBoolean((boolean) context.getValue());
+        }
     };
 
     // Byte
@@ -87,6 +92,12 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readByte());
+            eachContext.size = 1;
+        }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeByte((byte) context.getValue());
             eachContext.size = 1;
         }
     };
@@ -98,10 +109,17 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readShort());
             eachContext.size = 2;
         }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeShort((short) context.getValue());
+            eachContext.size = 2;
+        }
     };
 
     // Integer, value=type ("unsigned byte"|"unsigned short"|empty)
     protected final EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
+        // Integer deserializing
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
@@ -119,18 +137,51 @@ public class DefaultBinder implements Binder {
                 eachContext.size = 4;
             }
         }
+
+        // Integer serializing
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
+            if (type.equalsIgnoreCase("byte")) {
+                eachContext.dos.writeByte((int) context.getValue());
+                eachContext.size = 1;
+            } else if (type.equalsIgnoreCase("unsigned byte")) {
+                eachContext.dos.writeByte((int) context.getValue());
+                eachContext.size = 1;
+            } else if (type.equalsIgnoreCase("unsigned short")) {
+                eachContext.dos.writeShort((int) context.getValue());
+                eachContext.size = 2;
+            } else {
+                eachContext.dos.writeInt((int) context.getValue());
+                eachContext.size = 4;
+            }
+        }
     };
 
     // Long, value=type ("unsigned int"|empty)
     protected final EachBinder longEachBinder = new Binder.LongEachBinder() {
+        // Long deserializing
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
-            String type = Element.Util.getValue(field);
             DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
             if (type.equalsIgnoreCase("unsigned int")) {
                 context.setValue(eachContext.dis.readInt() & 0xffff_ffffL);
                 eachContext.size = 4;
             } else {
                 context.setValue(eachContext.dis.readLong());
+                eachContext.size = 8;
+            }
+        }
+
+        // Long serializing
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
+            if (type.equalsIgnoreCase("unsigned int")) {
+                eachContext.dos.writeInt((int) context.getValue());
+                eachContext.size = 4;
+            } else {
+                eachContext.dos.writeLong((long) context.getValue());
                 eachContext.size = 8;
             }
         }
@@ -143,6 +194,12 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readFloat());
             eachContext.size = 4;
         }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeFloat((float) context.getValue());
+            eachContext.size = 4;
+        }
     };
 
     // Double
@@ -150,6 +207,12 @@ public class DefaultBinder implements Binder {
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readDouble());
+            eachContext.size = 8;
+        }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeDouble((double) context.getValue());
             eachContext.size = 8;
         }
     };
@@ -161,10 +224,17 @@ public class DefaultBinder implements Binder {
             context.setValue(eachContext.dis.readChar());
             eachContext.size = 2;
         }
+
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.dos.writeChar((char) context.getValue());
+            eachContext.size = 2;
+        }
     };
 
     // Array, value=script for size
     protected final EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
+        // array deserializing
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             Object fieldValue = BeanUtil.getFieldValue(field, destBean);
@@ -172,9 +242,9 @@ public class DefaultBinder implements Binder {
                 eachContext.size = Array.getLength(fieldValue);
             }
             String sizeScript = Element.Util.getValue(field);
-logger.log(Level.TRACE, sizeScript);
+logger.log(Level.TRACE, "sizeScript: " + sizeScript);
             if (!sizeScript.isEmpty()) {
-                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue(); // TODO size means array size or total byte?
             }
 
             Class<?> fieldElementClass = field.getType().getComponentType();
@@ -252,16 +322,91 @@ logger.log(Level.TRACE, sizeScript);
                 }
             }
         }
+
+        // array serializing
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            Object fieldValue = context.getValue();
+            if (fieldValue != null) {
+                eachContext.size = Array.getLength(fieldValue);
+            }
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, "sizeScript: " + sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+
+            Class<?> fieldElementClass = field.getType().getComponentType();
+            if (fieldElementClass.equals(Byte.TYPE)) {
+                // byte array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeByte(((byte[]) fieldValue)[i]);
+                    }
+                } else {
+                    byte[] buf = new byte[eachContext.size];
+                    eachContext.dos.write(buf, 0, eachContext.size);
+                }
+            } else if (fieldElementClass.equals(Short.TYPE)) {
+                // short array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(((short[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Integer.TYPE)) {
+                // int array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(((int[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Long.TYPE)) {
+                // long array
+                if (fieldValue != null) {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(((long[]) fieldValue)[i]);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(0);
+                    }
+                }
+            } else {
+                // object array
+                Serdes annotation = fieldElementClass.getAnnotation(Serdes.class);
+                if (annotation == null) {
+                    throw new UnsupportedOperationException("use @Bound: " + fieldElementClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+                }
+                if (fieldValue == null) {
+                    fieldValue = Array.newInstance(fieldElementClass, eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    Object fieldBean = Array.get(fieldValue, i);
+                    eachContext.serialize(fieldBean);
+                }
+            }
+        }
     };
 
     // List, value=script for size
     protected final EachBinder listEachBinder = new Binder.ListEachBinder() {
+        // list deserializing
         @SuppressWarnings("unchecked")
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             Object fieldValue = BeanUtil.getFieldValue(field, destBean);
             String sizeScript = Element.Util.getValue(field);
-logger.log(Level.TRACE, sizeScript);
+logger.log(Level.TRACE, "sizeScript: " + sizeScript);
             if (!sizeScript.isEmpty()) {
                 eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
             }
@@ -327,10 +472,86 @@ logger.log(Level.TRACE, sizeScript);
                 }
             }
         }
+
+        // list serializing
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            Object fieldValue = context.getValue();
+            if (fieldValue != null) {
+                eachContext.size = ((List) fieldValue).size();
+            }
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, "sizeScript: " + sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+
+            Class<?> fieldElementClass = field.getType().getComponentType();
+            if (fieldElementClass.equals(Byte.TYPE)) {
+                // byte list
+                if (fieldValue != null) {
+                    for (byte b : (List<Byte>) fieldValue) {
+                        eachContext.dos.writeByte(b);
+                    }
+                } else {
+                    byte[] buf = new byte[eachContext.size];
+                    eachContext.dos.write(buf, 0, eachContext.size);
+                }
+            } else if (fieldElementClass.equals(Short.TYPE)) {
+                // short list
+                if (fieldValue != null) {
+                    for (short s : (List<Short>) fieldValue) {
+                        eachContext.dos.writeShort(s);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeShort(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Integer.TYPE)) {
+                // int list
+                if (fieldValue != null) {
+                    for (int i : (List<Integer>) fieldValue) {
+                        eachContext.dos.writeInt(i);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeInt(0);
+                    }
+                }
+            } else if (fieldElementClass.equals(Long.TYPE)) {
+                // long list
+                if (fieldValue != null) {
+                    for (long l : (List<Long>) fieldValue) {
+                        eachContext.dos.writeLong(l);
+                    }
+                } else {
+                    for (int i = 0; i < eachContext.size; i++) {
+                        eachContext.dos.writeLong(0);
+                    }
+                }
+            } else {
+                // object list
+                Serdes annotation = fieldElementClass.getAnnotation(Serdes.class);
+                if (annotation == null) {
+                    throw new UnsupportedOperationException("use @Bound: " + fieldElementClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
+                }
+                if (fieldValue == null) {
+                    fieldValue = Array.newInstance(fieldElementClass, eachContext.size);
+                }
+                for (int i = 0; i < eachContext.size; i++) {
+                    Object fieldBean = Array.get(fieldValue, i);
+                    eachContext.serialize(fieldBean);
+                }
+            }
+        }
     };
 
     // String, value=script for size
     protected final EachBinder stringEachBinder = new Binder.StringEachBinder() {
+        // String deserializing
         @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String sizeScript = Element.Util.getValue(field);
@@ -352,6 +573,29 @@ logger.log(Level.DEBUG, encoding);
             } else {
 logger.log(Level.DEBUG, () -> "no encoding: " + bytes.length + " bytes\n" + StringUtil.getDump(bytes));
                 context.setValue(new String(bytes));
+            }
+        }
+
+        // String serializing
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            eachContext.size = ((String) context.getValue()).length();
+            String sizeScript = Element.Util.getValue(field);
+logger.log(Level.TRACE, sizeScript);
+            if (!sizeScript.isEmpty()) {
+                eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue();
+            }
+            if (eachContext.size == 0) throw new IllegalStateException("size must be set for: " + field.getName());
+            String encoding = Element.Util.getEncoding(field);
+            if (encoding.isEmpty()) {
+                encoding = Serdes.Util.encoding(srcBean);
+            }
+            if (!encoding.isEmpty()) {
+logger.log(Level.DEBUG, encoding);
+                eachContext.dos.write(((String) context.getValue()).getBytes(Charset.forName(encoding)));
+            } else {
+logger.log(Level.DEBUG, () -> "no encoding: " + field.getName());
+                eachContext.dos.write(((String) context.getValue()).getBytes());
             }
         }
     };
@@ -379,6 +623,35 @@ logger.log(Level.DEBUG, () -> "no encoding: " + bytes.length + " bytes\n" + Stri
         } else if (type.equalsIgnoreCase("long")) {
             eachContext.size = 8;
             return eachContext.dis.readLong();
+        } else {
+            throw new IllegalArgumentException(type);
+        }
+    }
+
+    /** @throws IllegalArgumentException when type is not proper value */
+    private static void write(DefaultEachContext eachContext, String type, Object value) throws IOException {
+logger.log(Level.TRACE, "field: " + eachContext.field.getName() + ", type: " + type + ", value: " + value);
+        if (type.equalsIgnoreCase("byte")) {
+            eachContext.size = 1;
+            eachContext.dos.writeByte((byte) value);
+        } else if (type.equalsIgnoreCase("unsigned byte")) {
+            eachContext.size = 1;
+            eachContext.dos.writeByte((byte) value);
+        } else if (type.equalsIgnoreCase("short")) {
+            eachContext.size = 2;
+            eachContext.dos.writeShort((short) value);
+        } else if (type.equalsIgnoreCase("unsigned short")) {
+            eachContext.size = 2;
+            eachContext.dos.writeShort((short) value);
+        } else if (type.equalsIgnoreCase("int")) {
+            eachContext.size = 4;
+            eachContext.dos.writeInt((int) value);
+        } else if (type.equalsIgnoreCase("unsigned int")) {
+            eachContext.size = 4;
+            eachContext.dos.writeInt((int) value);
+        } else if (type.equalsIgnoreCase("long")) {
+            eachContext.size = 8;
+            eachContext.dos.writeLong((long)value);
         } else {
             throw new IllegalArgumentException(type);
         }
@@ -417,21 +690,63 @@ logger.log(Level.TRACE, "invokeValueMethod: " + enumType + ", " + enumObject + "
 
     // Enum, value=type ("int"|"unsigned byte"|...)
     protected final EachBinder enumEachBinder = new Binder.EnumEachBinder() {
-        @Override
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        // Enum deserializing
+        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
             // TODO fixed default value type "unsigned short"
             Object value = read(eachContext, !type.isEmpty() ? type : "unsigned short");
+logger.log(Level.TRACE, "value: " + value);
             Class<?> enumValueType = enumValueType(field.getType());
             if (enumValueType == Void.TYPE) {
                 eachContext.setValue(getEnum(field.getType(), e -> e.ordinal() == (Integer) value));
+                eachContext.size = 2;
             } else if (enumValueType == Integer.TYPE) {
                 // TODO fixed getter method name "getValue"
                 eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+                eachContext.size = 4;
             } else if (enumValueType == Long.TYPE) {
                 // TODO fixed getter method name "getValue"
                 eachContext.setValue(getEnum(field.getType(), e -> invokeValueMethod(field.getType(), e, "getValue").equals(value)));
+                eachContext.size = 8;
+            } else if (enumValueType == String.class) {
+                // TODO not implemented yet
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            } else {
+                throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
+            }
+        }
+
+        // Enum serializing
+        @Override public void bind(Object srcBean, Field field, EachContext context) throws IOException {
+            DefaultEachContext eachContext = (DefaultEachContext) context;
+            String type = Element.Util.getValue(field);
+            Class<?> enumValueType = enumValueType(field.getType());
+logger.log(Level.TRACE, "type: " + type + ", enumValueType: " + enumValueType);
+            if (enumValueType == Void.TYPE) {
+                if (!type.isEmpty()) {
+                    write(eachContext, type, ((Enum<?>) eachContext.getValue()).ordinal());
+                } else {
+                    // TODO fixed default value type "unsigned short"
+                    eachContext.dos.writeShort(((Enum<?>) eachContext.getValue()).ordinal());
+                    eachContext.size = 2;
+                }
+            } else if (enumValueType == Integer.TYPE) {
+                if (!type.isEmpty()) {
+                    write(eachContext, type, (Integer) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                } else {
+                    // TODO fixed getter method name "getValue"
+                    eachContext.dos.writeInt((Integer) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                    eachContext.size = 4;
+                }
+            } else if (enumValueType == Long.TYPE) {
+                if (!type.isEmpty()) {
+                    write(eachContext, type, (Long) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                } else {
+                    // TODO fixed getter method name "getValue"
+                    eachContext.dos.writeLong((Long) invokeValueMethod(field.getType(), (Enum<?>) eachContext.getValue(), "getValue"));
+                    eachContext.size = 8;
+                }
             } else if (enumValueType == String.class) {
                 // TODO not implemented yet
                 throw new UnsupportedOperationException("use @Bound: " + enumValueType + "] at " + field.getName() + " (" + context.getSequence() + ")");
@@ -452,7 +767,7 @@ logger.log(Level.TRACE, "invokeValueMethod: " + enumType + ", " + enumObject + "
         // means from 3rd parameters are user defined values.
 if (logger.isLoggable(Level.TRACE)) {
  Arrays.stream(enumClass.getDeclaredConstructors()).forEach(c ->
-  System.err.println(c.getName() + "." + ClassUtil.signatureWithName(c))
+  logger.log(Level.TRACE, c.getName() + "." + ClassUtil.signatureWithName(c))
  );
 }
         try {

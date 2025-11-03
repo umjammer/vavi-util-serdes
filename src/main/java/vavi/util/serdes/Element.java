@@ -28,6 +28,7 @@ public @interface Element {
 
     /**
      * depends {@link BeanBinder}.
+     * when the binder is {@link DefaultBeanBinder}, origin is 1.
      * @see DefaultBeanBinder
      */
     int sequence() default 0;

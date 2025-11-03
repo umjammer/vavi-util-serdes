@@ -8,6 +8,8 @@ package vavi.util.serdes;
 
 import java.util.List;
 
+import vavi.util.Debug;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +25,7 @@ class JaywayJsonPathBeanBinderTest {
     @Serdes(beanBinder = JaywayJsonPathBeanBinder.class)
     static class Store {
         @Element(sequence = 1, value = "$.store.book[*]")
-        List<Book> books;
+        Book[] books;
         @Serdes(beanBinder = JaywayJsonPathBeanBinder.class)
         static class Book {
             @Element(sequence = 1, value = "$.category")
@@ -38,10 +40,10 @@ class JaywayJsonPathBeanBinderTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("wip list binding")
     void test() throws Exception {
         Store store = new Store();
         Store r = Serdes.Util.deserialize(JaywayJsonPathBinder.class.getResourceAsStream("/test.json"), store);
-System.err.println(r);
+Debug.println(r);
     }
 }

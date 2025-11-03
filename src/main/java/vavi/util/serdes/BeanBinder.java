@@ -40,5 +40,5 @@ public interface BeanBinder<IO extends BeanBinder.IOSource> {
      * @return the same as out
      * @throws IllegalArgumentException out type is not supported
      */
-    Object serialize(Object destBean, Object out) throws IOException;
+    Object serialize(Object srcBean, Object out) throws IOException;
 }

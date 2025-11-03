@@ -16,6 +16,8 @@
 ### How To
 
  * define
+   * mark by `@Serdes` to a pojo you want to serialize/deserialize
+   * mark by `@Element` to a fields in the pojo and describe data structure like order, type and size etc.
 
 ```java
     @Serdes(bigEndian = false)
@@ -41,6 +43,7 @@
 ```
 
  * read
+    * using `Serdes.Util#deseralize` or `Serdes.Util#seralize` method you can serialize/deserialize
 
 ```jshelllanguage
     InputStream is = Files.newInputStream(Paths.get("/home/me/games/pc98/my.nhd"));
@@ -58,16 +61,19 @@
 
  [My plan](https://github.com/umjammer/vavi-util-screenscraping/wiki/AnnotationIinjectionIntoPOJO) will finally come into play.
 
-|name|status|library|
-|----|------|-------|
-|binary| ✅ | this  |
-|preferences| ✅ | this  |
-|properties | ⏳ | vavi-commons |
-|ini| ⏳ | vavi-commons |
-|json | ⏳ | vavi-util-screenscraping |
-|xml | ⏳ | vavi-util-screenscraping |
-|cli | ⏳ | klab-commons-cli |
-|csv | ⏳ | klab-commons-csv |
+| name        | ser  | des | implemented at           | library  | path language |
+|-------------|:----:|:---:|--------------------------|----------|---------------|
+| binary      | ✅ 🚧 |  ✅  | built-in                 | -        | -             |
+| xml         |  ✅   |  ✅  | built-in                 | jackson  | xpath         |
+| xml         |      |  ⏳  | built-in                 | jsoup    | xpath         |
+| json        |      |  ⏳  | built-in                 | jayway   | jsonpath      |
+| preferences |      |  ✅  | built-in                 | jdk      | -             |
+| xml         |  -   |  ⏳  | vavi-util-screenscraping | saxon    | xpath         |
+| json        |  -   |  ⏳  | vavi-util-screenscraping | jsonpath | jsonpath      |
+| properties  |  -   |  ⏳  | vavi-commons             |          |               |
+| ini         |  -   |  ⏳  | vavi-commons             |          |               |
+| cli         |  -   |  ⏳  | klab-commons-cli         |          |               |
+| csv         |  -   |  ⏳  | klab-commons-csv         |          |               |
 
 ## References
 
@@ -83,8 +89,9 @@
  * ~~Binary Binding~~
  * Text Binding
  * validation engine -> "spi" or "method" like *condition*
- * appallingly slow, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
- * enable subclass to set BeanBinder (currently uses the same BeanBinder of the super class)
+ * appallingly **slow**, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
+   * cache reflection
+ * enable subclass to set `BeanBinder` (currently uses the same BeanBinder of the super class)
  * toString bean binder? (implementation is apache commons?)
  * [MessagePack](https://github.com/msgpack/msgpack-java), [protobuf](https://github.com/protocolbuffers/protobuf/tree/master/java)
  * annotation translator
@@ -103,3 +110,4 @@
    @BitElement(sequence = 3, value = "......**|**......")
    int c;
 ```
+ * `int[] type = "unsigned byte"`

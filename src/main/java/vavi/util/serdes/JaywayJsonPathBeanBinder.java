@@ -11,6 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.lang.reflect.Field;
+import java.util.List;
+
+import vavi.util.serdes.Binder.EachContext;
+import vavi.util.serdes.SimpleBeanBinder.SimpleContext;
 
 import static java.lang.System.getLogger;
 
@@ -21,13 +26,13 @@ import static java.lang.System.getLogger;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 2022-12-18 nsano initial version <br>
  */
-public class JaywayJsonPathBeanBinder extends SimpleBeanBinder<JaywayJsonPathBeanBinder.NullIOSource> {
+public class JaywayJsonPathBeanBinder extends DefaultBeanBinder {
 
     private static final Logger logger = getLogger(JaywayJsonPathBeanBinder.class.getName());
 
     String source;
 
-    static class NullIOSource implements BeanBinder.IOSource {
+    static class NullIOSource extends DefaultInputSource {
     }
 
     @Override
@@ -49,13 +54,40 @@ logger.log(Level.DEBUG, "source: " + source);
         return io;
     }
 
+    /** disable eval (beanshell engine) method */
+    protected static class MyDefaultEachContext extends DefaultEachContext {
+
+        public MyDefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
+            super(sequence, isBigEndian, field, context);
+        }
+
+        @Override
+        public Object eval(String script) {
+            return script;
+        }
+    }
+
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object srcBean, Object io) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     protected Binder getDefaultBinder() {
         return new JaywayJsonPathBinder(source);
+    }
+
+    @Override
+    protected EachContext getEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
+        return new MyDefaultEachContext(sequence, isBigEndian, field, context);
+    }
+
+    @Override
+    protected Context getContext(IOSource io, List<Field> fields, Object bean) {
+        if (io instanceof DefaultInputSource iio) {
+            return new DefaultContext(iio, fields, bean, this);
+        } else {
+            throw new IllegalStateException(io.getClass().getName());
+        }
     }
 }

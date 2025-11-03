@@ -8,8 +8,11 @@ package vavi.util.serdes;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,8 +28,11 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import vavi.beans.BeanUtil;
 import vavi.io.LittleEndianDataInput;
 import vavi.io.LittleEndianDataInputStream;
+import vavi.io.LittleEndianDataOutput;
+import vavi.io.LittleEndianDataOutputStream;
 import vavi.io.LittleEndianSeekableDataInputStream;
 import vavi.io.SeekableDataInputStream;
 import vavi.util.StringUtil;
@@ -44,52 +50,78 @@ import vavi.util.serdes.DefaultBeanBinder.DefaultIOSource;
  */
 public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
 
+    public interface DefaultIOSource extends IOSource {}
+
     /**
-     * @param args 0: accepts {@link InputStream}, {@link SeekableByteChannel}
+     * @param args 0: accepts {@link InputStream}, {@link SeekableByteChannel}, {@link OutputStream}
      *             1: boolean true: big endian
      */
     @Override
     public DefaultIOSource getIOSource(Object... args) throws IOException {
-        DefaultIOSource in = new DefaultIOSource();
         if (args[0] instanceof InputStream is) {
+            DefaultInputSource in = new DefaultInputSource();
             in.bedis = new DataInputStream(is);
             in.ledis = new LittleEndianDataInputStream(is);
             in.available = is.available();
+            in.defaultDis = (boolean) args[1] ? in.bedis : in.ledis;
+            return in;
         } else if (args[0] instanceof SeekableByteChannel sbc) {
+            DefaultInputSource in = new DefaultInputSource();
             in.bedis = new SeekableDataInputStream(sbc);
             in.ledis = new LittleEndianSeekableDataInputStream(sbc);
             in.available = (int) (sbc.size() - sbc.position());
-        } else {
-            throw new IllegalArgumentException("unsupported class args[0]: " + args[0].getClass().getName());
+            in.defaultDis = (boolean) args[1] ? in.bedis : in.ledis;
+            return in;
+        } else if (args[0] instanceof OutputStream os) {
+            DefaultOutputSource out = new DefaultOutputSource();
+            out.bedos = new DataOutputStream(os);
+            out.ledos = new LittleEndianDataOutputStream(os);
+            out.defaultDos = (boolean) args[1] ? out.bedos : out.ledos;
+            return out;
         }
-        in.defaultDis = (boolean) args[1] ? in.bedis : in.ledis;
-        return in;
+
+        throw new IllegalArgumentException("unsupported class args[0]: " + args[0].getClass().getName());
     }
 
-    /** */
-    protected static class DefaultIOSource implements BeanBinder.IOSource {
+    /** for deserializing */
+    protected static class DefaultInputSource implements DefaultIOSource {
         DataInput bedis;
         LittleEndianDataInput ledis;
+        /** {@link Element#bigEndian()} considerable DataInput */
         DataInput defaultDis;
+        /** {@link Element#bigEndian()} considerable DataInput */
         DataInput get(boolean isBigendian) {
             return isBigendian ? bedis : ledis;
         }
         int available;
     }
 
-    /** not thread safe, should be public for script engine */
+    /** for serializing */
+    protected static class DefaultOutputSource implements DefaultIOSource {
+        DataOutput bedos;
+        LittleEndianDataOutput ledos;
+        /** {@link Element#bigEndian()} considerable DataOutput */
+        DataOutput defaultDos;
+        /** {@link Element#bigEndian()} considerable DataOutput */
+        DataOutput get(boolean isBigendian) {
+            return isBigendian ? bedos : ledos;
+        }
+    }
+
+    /** not thread safe, must be public for script engine */
     public static class DefaultContext implements BeanBinder.Context {
         final ScriptEngineManager manager = new ScriptEngineManager();
         final ScriptEngine engine = manager.getEngineByName("beanshell");
         final Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 
-        final DefaultIOSource in;
+        final DefaultIOSource io;
         final List<Field> fields;
         final Object bean;
         final DefaultBeanBinder beanBinder;
 
-        DefaultContext(IOSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
-            this.in = (DefaultIOSource) in;
+        /** for deserializing */
+        DefaultContext(DefaultInputSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
+            this.io = in;
             this.fields = fields;
             this.bean = bean;
             this.beanBinder = beanBinder;
@@ -97,7 +129,24 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             validateSequences(fields);
 
             try {
-                bindings.put("$0", this.in.available); // "$0" means whole data length
+                bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length TODO available is not object length but stream length
+                String prepare = "import static " + getClass().getName() + ".*;";
+                engine.eval(prepare);
+            } catch (ScriptException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        /** for serializing */
+        DefaultContext(DefaultOutputSource out, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
+            this.io = out;
+            this.fields = fields;
+            this.bean = bean;
+            this.beanBinder = beanBinder;
+
+            validateSequences(fields);
+
+            try {
                 String prepare = "import static " + getClass().getName() + ".*;";
                 engine.eval(prepare);
             } catch (ScriptException e) {
@@ -123,8 +172,8 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
     }
 
-    /** */
-    protected static class DefaultEachContext implements Binder.EachContext {
+    /** context for each field */
+    protected static class DefaultEachContext implements EachContext {
         public final int sequence;
         final DefaultContext context;
         final Field field;
@@ -141,22 +190,43 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             this.value = value;
         }
 
-        final DataInput dis;
+        /** {@link Element#bigEndian()} considerable DataInput */
+        DataInput dis;
+        /** {@link Element#bigEndian()} considerable DataOutput */
+        DataOutput dos;
 
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;
             this.field = field;
             this.context = (DefaultContext) context;
 
-            if (isBigEndian != null) {
-                dis = this.context.in.get(isBigEndian);
+            if (this.context.io instanceof DefaultInputSource) {
+                if (isBigEndian != null) {
+                    dis = ((DefaultInputSource) this.context.io).get(isBigEndian);
+                } else {
+                    dis = ((DefaultInputSource) this.context.io).defaultDis;
+                }
+            } else if (this.context.io instanceof DefaultOutputSource) {
+                if (isBigEndian != null) {
+                    dos = ((DefaultOutputSource) this.context.io).get(isBigEndian);
+                } else {
+                    dos = ((DefaultOutputSource) this.context.io).defaultDos;
+                }
             } else {
-                dis = this.context.in.defaultDis;
+                throw new IllegalStateException(this.context.io.getClass().getName());
             }
         }
-        @Override public void deserialize(Object destBean) throws IOException {
-            context.beanBinder.deserialize0(context.in, destBean);
+
+        @Override
+        public void deserialize(Object destBean) throws IOException {
+            context.beanBinder.deserialize0((DefaultInputSource) context.io, destBean);
         }
+
+        @Override
+        public void serialize(Object srcBean) throws IOException {
+            context.beanBinder.serialize0(srcBean, (DefaultOutputSource) context.io);
+        }
+
         /** @throws IllegalArgumentException eval failed */
         public Object eval(String script) {
             try {
@@ -165,9 +235,12 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
                 throw new IllegalArgumentException(script, e);
             }
         }
-        @Override public int getSequence() {
+
+        @Override
+        public int getSequence() {
             return sequence;
         }
+
         /**
          * beanshell script that used in equals method
          * <pre>
@@ -182,7 +255,8 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
          * </pre>
          * TODO scripting more freely? (user writes equals, then eval is like assertTrue)
          */
-        @Override public void validate(String validation) {
+        @Override
+        public void validate(String validation) {
             // TODO why bean shell accepts >= 0x80 byte value w/o (byte) cast?
             String validationScript;
             if (field.getType().isArray()) {
@@ -198,24 +272,30 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
                 throw new IllegalArgumentException(validation, e);
             }
         }
+
         /**
          * @param condition method name, signature is "method_name(I)B", argument is {@link Element#sequence()}
          */
-        @Override public boolean condition(String condition) {
+        @Override
+        public boolean condition(String condition) {
             try {
-                Method method = context.bean.getClass().getDeclaredMethod(condition, Integer.TYPE);
+                Method method = BeanUtil.getMethodByNameOf(context.bean.getClass(), condition, Integer.TYPE);
                 return (boolean) method.invoke(context.bean, sequence);
             } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new IllegalArgumentException(e);
             }
         }
-        @Override public void settleValues() {
+
+        @Override
+        public void settleValues() {
             // field values are stored as "$1", "$2" ...
             this.context.bindings.put("$" + sequence, value);
             // field sizes
             DefaultContext.sizeMap.put(value, size);
         }
-        @Override public String toString() {
+
+        @Override
+        public String toString() {
             return (size != 0 ? "{" + size + "}" : "" ) + " = " +
                     (value instanceof byte[] ? "\n" + StringUtil.getDump((byte[]) value, 64): value);
         }
@@ -230,8 +310,14 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     }
 
     @Override
-    protected Context getContext(IOSource in, List<Field> fields, Object bean) {
-        return new DefaultContext(in, fields, bean, this);
+    protected Context getContext(IOSource io, List<Field> fields, Object bean) {
+        if (io instanceof DefaultInputSource iio) {
+            return new DefaultContext(iio, fields, bean, this);
+        } else if (io instanceof DefaultOutputSource oio) {
+            return new DefaultContext(oio, fields, bean, this);
+        } else {
+            throw new IllegalStateException(io.getClass().getName());
+        }
     }
 
     @Override

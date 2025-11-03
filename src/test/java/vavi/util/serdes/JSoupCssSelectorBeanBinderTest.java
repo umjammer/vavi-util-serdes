@@ -6,12 +6,14 @@
 
 package vavi.util.serdes;
 
+import vavi.util.Debug;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
 /**
- * PreferencesBeanBinderTest.
+ * JSoupCssSelectorBeanBinderTest.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/11/07 umjammer initial version <br>
@@ -29,6 +31,6 @@ class JSoupCssSelectorBeanBinderTest {
     void test() throws Exception {
         Test1 test = new Test1();
         Serdes.Util.deserialize(JSoupCssSelectorBeanBinderTest.class.getResourceAsStream("/container.xml"), test);
-System.err.println(test.fillPath);
+Debug.println(test.fillPath);
     }
 }

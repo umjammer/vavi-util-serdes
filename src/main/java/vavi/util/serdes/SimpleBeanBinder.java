@@ -26,10 +26,10 @@ import vavi.util.serdes.Binder.EachContext;
  */
 public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinder<T> {
 
-    protected static class SimpleContext<U> implements BeanBinder.Context {
-        public final U in;
-        SimpleContext(U in, List<Field> fields, Object bean) {
-            this.in = in;
+    protected static class SimpleContext<T extends IOSource> implements BeanBinder.Context {
+        public final T io;
+        SimpleContext(T in, List<Field> fields, Object bean) {
+            this.io = in;
         }
     }
 
@@ -45,7 +45,11 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
         }
 
         @Override public void deserialize(Object destBean) throws IOException {
-            deserialize0(context.in, destBean);
+            deserialize0(context.io, destBean);
+        }
+
+        @Override public void serialize(Object srcBean) throws IOException {
+            serialize0(srcBean, context.io);
         }
 
         Object value;

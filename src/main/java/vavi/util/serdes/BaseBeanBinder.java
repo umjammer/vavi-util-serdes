@@ -43,10 +43,10 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
     protected abstract EachContext getEachContext(int sequence, Boolean isBigEndian, Field field, Context context);
 
     @Override
-    public Object deserialize(Object io, Object destBean) throws IOException {
-        T in = getIOSource(io, Serdes.Util.isBigEndian(destBean));
-        deserialize0(in, destBean);
-        return destBean;
+    public Object deserialize(Object io, Object dstBean) throws IOException {
+        T in = getIOSource(io, Serdes.Util.isBigEndian(dstBean));
+        deserialize0(in, dstBean);
+        return dstBean;
     }
 
     /**
@@ -57,14 +57,14 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
      * <li>do validation
      * </ol>
      */
-    protected void deserialize0(T in, Object destBean) throws IOException {
-        Serdes.Util.getAnnotation(destBean);
+    protected void deserialize0(T in, Object dstBean) throws IOException {
+        Serdes.Util.getAnnotation(dstBean);
 
         // list up fields
-        List<Field> elementFields = Serdes.Util.getElementFields(destBean);
+        List<Field> elementFields = Serdes.Util.getElementFields(dstBean);
 
         // injection
-        Context context = getContext(in, elementFields, destBean);
+        Context context = getContext(in, elementFields, dstBean);
 
         for (Field field : elementFields) {
 
@@ -89,7 +89,7 @@ logger.log(Level.DEBUG, "condition check is false");
                 binder = Bound.Util.getBinder(field);
             }
 logger.log(Level.TRACE, "binder: " + binder.getClass().getName());
-            binder.bind(eachContext, destBean, field);
+            binder.bind(eachContext, dstBean, field);
 logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachContext);
             eachContext.settleValues();
 
@@ -140,6 +140,14 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
                     continue;
                 }
             }
+
+            // validation
+            String validation = Element.Util.getValidation(field);
+            if (!validation.isEmpty()) {
+                eachContext.validate(validation);
+            }
+
+            eachContext.settleValues(); // TODO set all fields before loop?
 
             // each extraction
             Binder binder = getDefaultBinder();

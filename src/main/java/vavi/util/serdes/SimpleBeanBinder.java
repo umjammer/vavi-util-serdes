@@ -44,8 +44,8 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
             this.context = (SimpleContext<T>) context;
         }
 
-        @Override public void deserialize(Object destBean) throws IOException {
-            deserialize0(context.io, destBean);
+        @Override public void deserialize(Object dstBean) throws IOException {
+            deserialize0(context.io, dstBean);
         }
 
         @Override public void serialize(Object srcBean) throws IOException {

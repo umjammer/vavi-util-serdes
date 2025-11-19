@@ -20,9 +20,9 @@ import vavi.beans.Binder;
 public class AsciizBinder implements Binder {
 
     /**
-     * Sets the value to the destBean's field.
+     * Sets the value to the dstBean's field.
      */
-    public void bind(Object destBean, Field field, Class<?> fieldClass, String value, Object elseValue) {
+    public void bind(Object dstBean, Field field, Class<?> fieldClass, String value, Object elseValue) {
         // TODO Auto-generated method stub
     }
 }

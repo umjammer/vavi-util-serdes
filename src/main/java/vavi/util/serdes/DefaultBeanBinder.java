@@ -43,7 +43,7 @@ import vavi.util.serdes.DefaultBeanBinder.DefaultIOSource;
 /**
  * BeanBinders for binary.
  * <p>
- * {@link Element#sequence()} ... 1 origin (duplication is not allowed)
+ * {@link Element#sequence()} ... 1 origin (duplication is not allowed and causes exception)
  * </p>
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/26 umjammer initial version <br>
@@ -108,7 +108,18 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
     }
 
-    /** not thread safe, must be public for script engine */
+    /**
+     * context for a bean.
+     * <p>
+     * not thread safe, must be public for script engine
+     * <p>
+     * scripting predefined variables
+     * <pre>
+     *  * {@code $_} value of the bean
+     *  * {@code $#} value of the field. # is like 1, 2, 3 ..., 1 origin, means the {@link Element#sequence()}
+     *  * {@code $0} is whole data length TODO $0 is not object length but stream length
+     * </pre>
+     */
     public static class DefaultContext implements BeanBinder.Context {
         final ScriptEngineManager manager = new ScriptEngineManager();
         final ScriptEngine engine = manager.getEngineByName("beanshell");
@@ -218,8 +229,8 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         @Override
-        public void deserialize(Object destBean) throws IOException {
-            context.beanBinder.deserialize0((DefaultInputSource) context.io, destBean);
+        public void deserialize(Object dstBean) throws IOException {
+            context.beanBinder.deserialize0((DefaultInputSource) context.io, dstBean);
         }
 
         @Override
@@ -286,6 +297,10 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             }
         }
 
+        /**
+         * set bsh value named "$#" as the java field {@link #value}
+         * and update {@link DefaultContext#sizeMap}
+         */
         @Override
         public void settleValues() {
             // field values are stored as "$1", "$2" ...

@@ -65,7 +65,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Boolean
     protected final EachBinder booleanEachBinder = new BooleanEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -78,7 +78,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Integer
     protected final EachBinder integerEachBinder = new IntegerEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -91,7 +91,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Short
     protected final EachBinder shortEachBinder = new ShortEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -104,7 +104,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Byte
     protected final EachBinder byteEachBinder = new ByteEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -117,7 +117,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Long
     protected final EachBinder longEachBinder = new LongEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -130,7 +130,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Float
     protected final EachBinder floatEachBinder = new FloatEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -143,7 +143,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Double
     protected final EachBinder doubleEachBinder = new DoubleEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -156,7 +156,7 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Character
     protected final EachBinder characterEachBinder = new CharacterEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);
@@ -169,10 +169,10 @@ logger.log(Level.DEBUG, "XPathFactory: " + factory.getClass().getName());
 
     // Array
     protected final EachBinder arrayEachBinder = new ArrayEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             DefaultBeanBinder.DefaultEachContext eachContext = (DefaultBeanBinder.DefaultEachContext) context;
-            Object fieldValue = BeanUtil.getFieldValue(field, destBean);
+            Object fieldValue = BeanUtil.getFieldValue(field, dstBean);
             if (fieldValue != null) {
                 eachContext.size = Array.getLength(fieldValue);
             }
@@ -213,7 +213,7 @@ if (nodeList.isEmpty()) {
 
     // String
     protected final EachBinder stringEachBinder = new StringEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String xpath = Element.Util.getValue(field);
             try {
                 String text = (String) xPath.evaluate(xpath, new InputSource(new StringReader(source)), XPathConstants.STRING);

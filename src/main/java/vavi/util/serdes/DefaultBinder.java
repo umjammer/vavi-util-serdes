@@ -32,30 +32,31 @@ import static java.lang.System.getLogger;
 /**
  * DefaultBinder.
  * <ul>
- * <li> {@link Element#value()}
+ * <li> {@link Element#value()} value set to this annotation field will be evaluated by script engine.
  * <pre>
  * engine
  *
  *  * beanshell
  *
- * pre-bound
+ * pre-bound variables
  *
- *  * $# # is 1, 2, 3 ...
- *  * $0 is whole data length
+ *  * {@code $_} value of the bean
+ *  * {@code $#} value of the field. # is like 1, 2, 3 ..., 1 origin, means the {@link Element#sequence()}
+ *  * {@code $0} is whole data length TODO $0 is not object length but stream length
  *
  * function
  *
- *  * len(arg) returns length of the array arg
- *  * sizeof(arg) returns size of the arg
+ *  * {@code len(arg)} returns length of the array arg
+ *  * {@code sizeof(arg)} returns size of the arg
  *
  * value
  *
- *  * java primitives
+ *  * when field is a java primitive
  *
- *  ** default size of java primitives
- *  ** "unsigned int" unsigned 32 bit
+ *  ** default size of java primitives (Integer.BYTES, Short.BYTES, ...)
+ *  ** {@code unsigned int} unsigned 32 bit
  *
- * * array
+ * * when field is an array
  *
  *  ** value length of the array
  * </pre>
@@ -75,7 +76,7 @@ public class DefaultBinder implements Binder {
 
     // Boolean
     protected final EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readBoolean());
             eachContext.size = 1;
@@ -89,7 +90,7 @@ public class DefaultBinder implements Binder {
 
     // Byte
     protected final EachBinder byteEachBinder = new Binder.ByteEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readByte());
             eachContext.size = 1;
@@ -104,7 +105,7 @@ public class DefaultBinder implements Binder {
 
     // Short
     protected final EachBinder shortEachBinder = new Binder.ShortEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dsstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readShort());
             eachContext.size = 2;
@@ -120,7 +121,7 @@ public class DefaultBinder implements Binder {
     // Integer, value=type ("unsigned byte"|"unsigned short"|empty)
     protected final EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
         // Integer deserializing
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
             if (type.equalsIgnoreCase("byte")) {
@@ -161,7 +162,7 @@ public class DefaultBinder implements Binder {
     // Long, value=type ("unsigned int"|empty)
     protected final EachBinder longEachBinder = new Binder.LongEachBinder() {
         // Long deserializing
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
             if (type.equalsIgnoreCase("unsigned int")) {
@@ -189,7 +190,7 @@ public class DefaultBinder implements Binder {
 
     // Float
     protected final EachBinder floatEachBinder = new Binder.FloatEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readFloat());
             eachContext.size = 4;
@@ -204,7 +205,7 @@ public class DefaultBinder implements Binder {
 
     // Double
     protected final EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readDouble());
             eachContext.size = 8;
@@ -219,7 +220,7 @@ public class DefaultBinder implements Binder {
 
     // Character
     protected final EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             context.setValue(eachContext.dis.readChar());
             eachContext.size = 2;
@@ -235,9 +236,9 @@ public class DefaultBinder implements Binder {
     // Array, value=script for size
     protected final EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
         // array deserializing
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
-            Object fieldValue = BeanUtil.getFieldValue(field, destBean);
+            Object fieldValue = BeanUtil.getFieldValue(field, dstBean);
             if (fieldValue != null) {
                 eachContext.size = Array.getLength(fieldValue);
             }
@@ -402,9 +403,9 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
     protected final EachBinder listEachBinder = new Binder.ListEachBinder() {
         // list deserializing
         @SuppressWarnings("unchecked")
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
-            Object fieldValue = BeanUtil.getFieldValue(field, destBean);
+            Object fieldValue = BeanUtil.getFieldValue(field, dstBean);
             String sizeScript = Element.Util.getValue(field);
 logger.log(Level.TRACE, "sizeScript: " + sizeScript);
             if (!sizeScript.isEmpty()) {
@@ -552,7 +553,7 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
     // String, value=script for size
     protected final EachBinder stringEachBinder = new Binder.StringEachBinder() {
         // String deserializing
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String sizeScript = Element.Util.getValue(field);
 logger.log(Level.TRACE, sizeScript);
@@ -565,7 +566,7 @@ logger.log(Level.TRACE, sizeScript);
             eachContext.dis.readFully(bytes);
             String encoding = Element.Util.getEncoding(field);
             if (encoding.isEmpty()) {
-                encoding = Serdes.Util.encoding(destBean);
+                encoding = Serdes.Util.encoding(dstBean);
             }
             if (!encoding.isEmpty()) {
 logger.log(Level.DEBUG, encoding);
@@ -691,7 +692,7 @@ logger.log(Level.TRACE, "invokeValueMethod: " + enumType + ", " + enumObject + "
     // Enum, value=type ("int"|"unsigned byte"|...)
     protected final EachBinder enumEachBinder = new Binder.EnumEachBinder() {
         // Enum deserializing
-        @Override public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        @Override public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             DefaultEachContext eachContext = (DefaultEachContext) context;
             String type = Element.Util.getValue(field);
             // TODO fixed default value type "unsigned short"

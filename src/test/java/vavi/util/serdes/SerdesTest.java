@@ -399,6 +399,12 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         B b2;
     }
 
+    /**
+     * enum special specification:
+     * <li>default deserialized value assumed to short size (2) byte array. you can specify the size at {@code value}</li>
+     * <li>default deserialized value is compared with {@code ordinal()}.
+     *     the case if there is a method named {@code getValue()}, it is used instead of {@code ordinal()}.</li>
+     */
     @Test
     @DisplayName("enum")
     void test15() throws Exception {
@@ -464,7 +470,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
-    @DisplayName("encoding at element and stronger than at serdes")
+    @DisplayName("'encoding' at @Element priority is higher than it at @Serdes")
     void test18() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -571,6 +577,7 @@ Debug.println(test.chldren);
         assertArrayEquals(baos.toByteArray(), test.b);
     }
 
+    // TODO $0 is not while size of beans, but stream length at this moment (just before serialising)
     @Serdes
     static class Test23 {
         @Element(sequence = 1, validation = "$0") // $0 means size of Test23

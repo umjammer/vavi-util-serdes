@@ -193,12 +193,12 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
     }
 
     /** context for each field */
-    protected static class DefaultEachContext implements EachContext {
+    public static class DefaultEachContext implements EachContext {
         public final int sequence;
-        final DefaultContext context;
-        final Field field;
+        public final DefaultContext context;
+        public final Field field;
 
-        public Object value;
+        protected Object value;
         public int size;
 
         @Override
@@ -211,9 +211,9 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
         }
 
         /** {@link Element#bigEndian()} considerable DataInput */
-        DataInput dis;
+        public DataInput dis;
         /** {@link Element#bigEndian()} considerable DataOutput */
-        DataOutput dos;
+        public DataOutput dos;
 
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;

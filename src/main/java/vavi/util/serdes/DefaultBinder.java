@@ -313,7 +313,7 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
                     }
                     for (int i = 0; i < eachContext.size; i++) {
                         Object fieldBean = fieldElementClass.getDeclaredConstructor().newInstance();
-                        eachContext.deserialize(fieldBean);
+                        eachContext.deserialize(fieldBean, dstBean);
                         Array.set(fieldValue, i, fieldBean);
                     }
                     context.setValue(fieldValue);
@@ -393,7 +393,7 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
                 }
                 for (int i = 0; i < eachContext.size; i++) {
                     Object fieldBean = Array.get(fieldValue, i);
-                    eachContext.serialize(fieldBean);
+                    eachContext.serialize(fieldBean, srcBean);
                 }
             }
         }
@@ -463,7 +463,7 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
                     }
                     for (int i = 0; i < eachContext.size; i++) {
                         Object fieldBean = genericTypeClass.getDeclaredConstructor().newInstance();
-                        eachContext.deserialize(fieldBean);
+                        eachContext.deserialize(fieldBean, dstBean);
                         ((List<Object>) fieldValue).add(fieldBean);
                     }
                     context.setValue(fieldValue);
@@ -544,7 +544,7 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
                 }
                 for (int i = 0; i < eachContext.size; i++) {
                     Object fieldBean = Array.get(fieldValue, i);
-                    eachContext.serialize(fieldBean);
+                    eachContext.serialize(fieldBean, srcBean);
                 }
             }
         }

@@ -15,7 +15,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import vavi.util.serdes.Binder.EachContext;
-import vavi.util.serdes.SimpleBeanBinder.SimpleContext;
 
 import static java.lang.System.getLogger;
 
@@ -83,9 +82,9 @@ logger.log(Level.DEBUG, "source: " + source);
     }
 
     @Override
-    protected Context getContext(IOSource io, List<Field> fields, Object bean) {
+    protected Context getContext(IOSource io, List<Field> fields, Object bean, Object parent) {
         if (io instanceof DefaultInputSource iio) {
-            return new DefaultContext(iio, fields, bean, this);
+            return new DefaultContext(iio, fields, bean, parent, this);
         } else {
             throw new IllegalStateException(io.getClass().getName());
         }

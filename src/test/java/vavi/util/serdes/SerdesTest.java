@@ -673,4 +673,36 @@ Debug.println("bytes: " + StringUtil.getDump("Naohide Sano\0xyz".getBytes()));
         assertEquals("Naohide Sano", bean.a);
         assertEquals(1234, bean.b);
     }
+
+    @Serdes
+    public static class Test27 {
+        @Element(sequence = 1)
+        public int a; // must be public for script engine
+        @Element(sequence = 2)
+        Test27Sub b;
+
+        public int doubler(int x) { // must be public for script engine
+            return x * 2;
+        }
+
+        @Serdes
+        public static class Test27Sub {
+            @Element(sequence = 1, value = "$__.doubler($__.a)") // '$__' is a parent object
+            byte[] c;
+        }
+    }
+
+    @Test
+    @DisplayName("nested class referencing")
+    void test27() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(3));
+        baos.write("xyzabc".getBytes());
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        Test27 bean = new Test27();
+        Serdes.Util.deserialize(bais, bean);
+        assertEquals(3, bean.a);
+        assertArrayEquals("xyzabc".getBytes(), bean.b.c);
+    }
 }

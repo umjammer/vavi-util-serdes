@@ -44,12 +44,12 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
             this.context = (SimpleContext<T>) context;
         }
 
-        @Override public void deserialize(Object dstBean) throws IOException {
-            deserialize0(context.io, dstBean);
+        @Override public void deserialize(Object dstBean, Object parent) throws IOException {
+            deserialize0(context.io, dstBean, parent);
         }
 
-        @Override public void serialize(Object srcBean) throws IOException {
-            serialize0(srcBean, context.io);
+        @Override public void serialize(Object srcBean, Object parent) throws IOException {
+            serialize0(srcBean, context.io, parent);
         }
 
         Object value;
@@ -67,6 +67,7 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
         @Override public boolean condition(String condition) {
             return true;
         }
+        /** do nothing */
         @Override public void settleValues() {
         }
     }
@@ -81,7 +82,7 @@ public abstract class SimpleBeanBinder<T extends IOSource> extends BaseBeanBinde
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    protected Context getContext(IOSource in, List<Field> fields, Object bean) {
+    protected Context getContext(IOSource in, List<Field> fields, Object bean, Object parent) {
         return new SimpleContext(in, fields, bean);
     }
 

@@ -128,7 +128,7 @@ public interface Binder {
                 if (fieldValue == null) {
                     fieldValue = field.getType().getDeclaredConstructor().newInstance();
                 }
-                context.deserialize(fieldValue);
+                context.deserialize(fieldValue, dstBean);
                 context.setValue(fieldValue);
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalStateException(e);
@@ -140,7 +140,7 @@ public interface Binder {
                 if (fieldValue == null) {
                     fieldValue = field.getType().getDeclaredConstructor().newInstance();
                 }
-                context.serialize(fieldValue);
+                context.serialize(fieldValue, srcBean);
                 context.setValue(fieldValue);
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalStateException(e);
@@ -149,6 +149,7 @@ public interface Binder {
     };
 
     /**
+     * for deserializing
      * @throws IllegalArgumentException when eval failed
      * @throws UnsupportedOperationException float, double, char
      */
@@ -159,6 +160,7 @@ public interface Binder {
             eb.get().bind(context, dstBean, field);
         } else {
             if (defaultEachBinder.matches(fieldClass)) {
+                // nested @Serdes
                 defaultEachBinder.bind(context, dstBean, field);
             } else {
                 throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
@@ -169,6 +171,7 @@ public interface Binder {
     }
 
     /**
+     * for serializing
      * @throws IllegalArgumentException when eval failed
      * @throws UnsupportedOperationException float, double, char
      */
@@ -181,6 +184,7 @@ public interface Binder {
             eb.get().bind(srcBean, field, context);
         } else {
             if (defaultEachBinder.matches(fieldClass)) {
+                // nested @Serdes
                 defaultEachBinder.bind(srcBean, field, context);
             } else {
                 throw new UnsupportedOperationException("use @Bound: " + fieldClass.getTypeName() + "] at " + field.getName() + " (" + context.getSequence() + ")");
@@ -207,9 +211,9 @@ public interface Binder {
         /**
          * recursion
          */
-        void deserialize(Object fieldValue) throws IOException;
+        void deserialize(Object fieldValue, Object parent) throws IOException;
 
-        void serialize(Object fieldValue) throws IOException;
+        void serialize(Object fieldValue, Object parent) throws IOException;
 
         /**
          * finalization (sets values to {@link vavi.util.serdes.BeanBinder.Context} etc.)
@@ -217,6 +221,8 @@ public interface Binder {
         void settleValues();
     }
 
-    /** */
-    EachBinder[] getEachBinders();
+    /** TODO is this a really interface? */
+    default EachBinder[] getEachBinders() {
+        throw new UnsupportedOperationException("override this method");
+    }
 }

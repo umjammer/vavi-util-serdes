@@ -200,7 +200,7 @@ if (nodeList.isEmpty()) {
                 List<Object> result = new ArrayList<>();
                 for (int i = 0; i < eachContext.size; i++) {
                     Object fieldBean = fieldElementClass.getDeclaredConstructor().newInstance();
-                    eachContext.deserialize(fieldBean);
+                    eachContext.deserialize(fieldBean, dstBean);
                     result.add(fieldBean);
                 }
                 context.setValue(result.toArray());

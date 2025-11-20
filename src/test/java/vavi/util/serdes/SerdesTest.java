@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import vavi.io.LittleEndianDataOutputStream;
 import vavi.test.box.Box;
 import vavi.util.ByteUtil;
 import vavi.util.Debug;
+import vavi.util.StringUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -645,5 +647,30 @@ Debug.println(test.chldren);
         DataOutputStream dos = new DataOutputStream(expectedBaos);
         dos.writeInt(Test25.A.A2.ordinal());
         assertArrayEquals(expectedBaos.toByteArray(), baos.toByteArray());
+    }
+
+    @Serdes(bigEndian = false)
+    public static class Test26 {
+        @Element(sequence = 1, value = "16") // value is byte length for String
+        @Bound(binder = AsciizBinder.class) // set special binder
+        String a;
+        @Element(sequence = 2)
+        short b;
+    }
+
+    @Test
+    @DisplayName("asciiz binder")
+    void test26() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LittleEndianDataOutputStream ledos = new LittleEndianDataOutputStream(baos);
+Debug.println("bytes: " + StringUtil.getDump("Naohide Sano\0xyz".getBytes()));
+        ledos.write("Naohide Sano\0xyz".getBytes());
+        ledos.writeShort(1234);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        Test26 bean = new Test26();
+        Serdes.Util.deserialize(bais, bean);
+        assertEquals("Naohide Sano", bean.a);
+        assertEquals(1234, bean.b);
     }
 }

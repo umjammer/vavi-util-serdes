@@ -49,10 +49,10 @@ public @interface Serdes {
         }
 
         /** search super classes recursively */
-        static List<Field> getElementFields(Object destBean) {
+        static List<Field> getElementFields(Object bean) {
             List<Field> elementFields = new ArrayList<>();
 
-            Class<?> clazz = destBean.getClass();
+            Class<?> clazz = bean.getClass();
             while (clazz != null) {
                 for (Field field : clazz.getDeclaredFields()) {
                     Element elementAnnotation = field.getAnnotation(Element.class);
@@ -78,8 +78,8 @@ public @interface Serdes {
          * search super classes recursively
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
-        static Serdes getAnnotation(Object destBean) {
-            Class<?> clazz = destBean.getClass();
+        static Serdes getAnnotation(Object bean) {
+            Class<?> clazz = bean.getClass();
             while (clazz != null) {
                 Serdes serdesAnnotation = clazz.getAnnotation(Serdes.class);
                 if (serdesAnnotation != null) {
@@ -93,16 +93,16 @@ public @interface Serdes {
         /**
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
-        static boolean isBigEndian(Object destBean) {
-            Serdes serdesAnnotation = getAnnotation(destBean);
+        static boolean isBigEndian(Object bean) {
+            Serdes serdesAnnotation = getAnnotation(bean);
             return serdesAnnotation.bigEndian();
         }
 
         /**
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
-        static String encoding(Object destBean) {
-            Serdes serdesAnnotation = getAnnotation(destBean);
+        static String encoding(Object bean) {
+            Serdes serdesAnnotation = getAnnotation(bean);
             return serdesAnnotation.encoding();
         }
 
@@ -110,8 +110,8 @@ public @interface Serdes {
          *
          * @throws NullPointerException when field is not annotated by {@link Serdes}
          */
-        static BeanBinder<? extends BeanBinder.IOSource> getBeanBinder(Object destBean) {
-            Serdes serdesAnnotation = getAnnotation(destBean);
+        static BeanBinder<? extends BeanBinder.IOSource> getBeanBinder(Object bean) {
+            Serdes serdesAnnotation = getAnnotation(bean);
             try {
                 return serdesAnnotation.beanBinder().getDeclaredConstructor().newInstance();
             } catch (Exception e) {
@@ -120,15 +120,15 @@ public @interface Serdes {
         }
 
         /**
-         * Deserializes data into a POJO destBean from in.
+         * Deserializes data into a POJO dstBean from in.
          *
          * @throws IllegalArgumentException thrown by validation failure
          * @throws IllegalStateException might be thrown by wrong annotation settings
          */
         @SuppressWarnings("unchecked")
-        public static <T> T deserialize(Object in, T destBean) throws IOException {
-            BeanBinder<? extends BeanBinder.IOSource> binders = getBeanBinder(destBean);
-            return (T) binders.deserialize(in, destBean);
+        public static <T> T deserialize(Object in, T dstBean) throws IOException {
+            BeanBinder<? extends BeanBinder.IOSource> binders = getBeanBinder(dstBean);
+            return (T) binders.deserialize(in, dstBean);
         }
 
         /**

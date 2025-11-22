@@ -31,7 +31,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Boolean
     protected final EachBinder booleanEachBinder = new BooleanEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -39,7 +39,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Integer
     protected final EachBinder integerEachBinder = new IntegerEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -47,7 +47,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Short
     protected final EachBinder shortEachBinder = new ShortEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -55,7 +55,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Byte
     protected final EachBinder byteEachBinder = new ByteEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -63,7 +63,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Long
     protected final EachBinder longEachBinder = new LongEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -71,7 +71,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Float
     protected final EachBinder floatEachBinder = new FloatEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -79,7 +79,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Double
     protected final EachBinder doubleEachBinder = new DoubleEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -87,7 +87,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Character
     protected final EachBinder characterEachBinder = new CharacterEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }
@@ -95,7 +95,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // Array
     protected final EachBinder arrayEachBinder = new ArrayEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             if (fieldElementClass.equals(Byte.TYPE)) {
                 // byte array
@@ -109,7 +109,7 @@ public class JSoupCssSelectorBinder implements Binder {
 
     // String
     protected final EachBinder stringEachBinder = new StringEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String selector = Element.Util.getValue(field);
             context.setValue(document.select(selector));
         }

@@ -88,14 +88,14 @@
  * ~~got error cause betwixt.Validator is abstract~~ 
  * ~~Binary Binding~~
  * Text Binding
- * validation engine -> "spi" or "method" like *condition*
- * appallingly **slow**, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
+ * validation engine → "spi" or "method" like *condition*
+ * painfully **slow**, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
    * cache reflection
  * enable subclass to set `BeanBinder` (currently uses the same BeanBinder of the super class)
  * toString bean binder? (implementation is apache commons?)
  * [MessagePack](https://github.com/msgpack/msgpack-java), [protobuf](https://github.com/protocolbuffers/protobuf/tree/master/java)
  * annotation translator
-   * e.g. Jackson's `@JsonProperty` -> my `@Target`
+   * e.g. Jackson's `@JsonXmlProperty` → my `@Element`
  * xml
    * [simple](http://simple.sourceforge.net/home.php)
    * [jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
@@ -111,3 +111,5 @@
    int c;
 ```
  * `int[] type = "unsigned byte"`
+ * use w/ default java serialization functionality Object(Input|Output)Stream
+ * before/after method???

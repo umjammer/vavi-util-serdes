@@ -31,10 +31,10 @@ public interface BeanBinder<IO extends BeanBinder.IOSource> {
     IO getIOSource(Object... args) throws IOException;
 
     /**
-     * @return the same as destBean
+     * @return the same as dstBean
      * @throws IllegalArgumentException in type is not supported
      */
-    Object deserialize(Object in, Object destBean) throws IOException;
+    Object deserialize(Object in, Object dstBean) throws IOException;
 
     /**
      * @return the same as out

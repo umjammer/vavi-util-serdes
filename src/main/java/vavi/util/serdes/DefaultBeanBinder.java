@@ -13,6 +13,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -43,12 +45,14 @@ import vavi.util.serdes.DefaultBeanBinder.DefaultIOSource;
 /**
  * BeanBinders for binary.
  * <p>
- * {@link Element#sequence()} ... 1 origin (duplication is not allowed)
+ * {@link Element#sequence()} ... 1 origin (duplication is not allowed and causes exception)
  * </p>
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/26 umjammer initial version <br>
  */
 public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
+
+    private static final Logger logger = System.getLogger(DefaultBeanBinder.class.getName());
 
     public interface DefaultIOSource extends IOSource {}
 
@@ -108,7 +112,18 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
     }
 
-    /** not thread safe, must be public for script engine */
+    /**
+     * context for a bean.
+     * <p>
+     * not thread safe, must be public for script engine
+     * <p>
+     * scripting predefined variables
+     * <pre>
+     *  * {@code $_} value of the bean
+     *  * {@code $#} value of the field. # is like 1, 2, 3 ..., 1 origin, means the {@link Element#sequence()}
+     *  * {@code $0} is whole data length TODO $0 is not object length but stream length
+     * </pre>
+     */
     public static class DefaultContext implements BeanBinder.Context {
         final ScriptEngineManager manager = new ScriptEngineManager();
         final ScriptEngine engine = manager.getEngineByName("beanshell");
@@ -120,7 +135,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         final DefaultBeanBinder beanBinder;
 
         /** for deserializing */
-        DefaultContext(DefaultInputSource in, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
+        DefaultContext(DefaultInputSource in, List<Field> fields, Object bean, Object parent, DefaultBeanBinder beanBinder) {
             this.io = in;
             this.fields = fields;
             this.bean = bean;
@@ -129,6 +144,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             validateSequences(fields);
 
             try {
+logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
+                bindings.put("$__", parent);
+                bindings.put("$_", bean);
                 bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length TODO available is not object length but stream length
                 String prepare = "import static " + getClass().getName() + ".*;";
                 engine.eval(prepare);
@@ -138,7 +156,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         /** for serializing */
-        DefaultContext(DefaultOutputSource out, List<Field> fields, Object bean, DefaultBeanBinder beanBinder) {
+        DefaultContext(DefaultOutputSource out, List<Field> fields, Object bean, Object parent, DefaultBeanBinder beanBinder) {
             this.io = out;
             this.fields = fields;
             this.bean = bean;
@@ -147,6 +165,8 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             validateSequences(fields);
 
             try {
+                bindings.put("$__", parent);
+                bindings.put("$_", bean);
                 String prepare = "import static " + getClass().getName() + ".*;";
                 engine.eval(prepare);
             } catch (ScriptException e) {
@@ -173,12 +193,12 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     }
 
     /** context for each field */
-    protected static class DefaultEachContext implements EachContext {
+    public static class DefaultEachContext implements EachContext {
         public final int sequence;
-        final DefaultContext context;
-        final Field field;
+        public final DefaultContext context;
+        public final Field field;
 
-        public Object value;
+        protected Object value;
         public int size;
 
         @Override
@@ -191,9 +211,9 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         /** {@link Element#bigEndian()} considerable DataInput */
-        DataInput dis;
+        public DataInput dis;
         /** {@link Element#bigEndian()} considerable DataOutput */
-        DataOutput dos;
+        public DataOutput dos;
 
         public DefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
             this.sequence = sequence;
@@ -218,13 +238,13 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
         }
 
         @Override
-        public void deserialize(Object destBean) throws IOException {
-            context.beanBinder.deserialize0((DefaultInputSource) context.io, destBean);
+        public void deserialize(Object dstBean, Object parent) throws IOException {
+            context.beanBinder.deserialize0((DefaultInputSource) context.io, dstBean, parent);
         }
 
         @Override
-        public void serialize(Object srcBean) throws IOException {
-            context.beanBinder.serialize0(srcBean, (DefaultOutputSource) context.io);
+        public void serialize(Object srcBean, Object parent) throws IOException {
+            context.beanBinder.serialize0(srcBean, (DefaultOutputSource) context.io, parent);
         }
 
         /** @throws IllegalArgumentException eval failed */
@@ -286,6 +306,10 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             }
         }
 
+        /**
+         * set bsh value named "$#" as the java field {@link #value}
+         * and update {@link DefaultContext#sizeMap}
+         */
         @Override
         public void settleValues() {
             // field values are stored as "$1", "$2" ...
@@ -310,11 +334,11 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
     }
 
     @Override
-    protected Context getContext(IOSource io, List<Field> fields, Object bean) {
+    protected Context getContext(IOSource io, List<Field> fields, Object bean, Object parent) {
         if (io instanceof DefaultInputSource iio) {
-            return new DefaultContext(iio, fields, bean, this);
+            return new DefaultContext(iio, fields, bean, parent, this);
         } else if (io instanceof DefaultOutputSource oio) {
-            return new DefaultContext(oio, fields, bean, this);
+            return new DefaultContext(oio, fields, bean, parent, this);
         } else {
             throw new IllegalStateException(io.getClass().getName());
         }

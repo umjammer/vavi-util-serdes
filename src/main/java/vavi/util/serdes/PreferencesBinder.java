@@ -32,103 +32,103 @@ public class PreferencesBinder implements Binder {
 
     // Boolean
     protected final EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            boolean fieldValue = (boolean) BeanUtil.getFieldValue(field, destBean);
+            boolean fieldValue = (boolean) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getBoolean(name, fieldValue));
         }
     };
 
     // Integer
     protected final EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            int fieldValue = (int) BeanUtil.getFieldValue(field, destBean);
+            int fieldValue = (int) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getInt(name, fieldValue));
         }
     };
 
     // Short
     protected final EachBinder shortEachBinder = new Binder.ShortEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            short fieldValue = (short) BeanUtil.getFieldValue(field, destBean);
+            short fieldValue = (short) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getInt(name, fieldValue & 0xffff));
         }
     };
 
     // Byte
     protected final EachBinder byteEachBinder = new Binder.ByteEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            byte fieldValue = (byte) BeanUtil.getFieldValue(field, destBean);
+            byte fieldValue = (byte) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getInt(name, fieldValue & 0xff));
         }
     };
 
     // Long
     protected final EachBinder longEachBinder = new Binder.LongEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            long fieldValue = (long) BeanUtil.getFieldValue(field, destBean);
+            long fieldValue = (long) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getLong(name, fieldValue));
         }
     };
 
     // Float
     protected final EachBinder floatEachBinder = new Binder.FloatEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            float fieldValue = (float) BeanUtil.getFieldValue(field, destBean);
+            float fieldValue = (float) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getFloat(name, fieldValue));
         }
     };
 
     // Double
     protected final EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            double fieldValue = (double) BeanUtil.getFieldValue(field, destBean);
+            double fieldValue = (double) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getDouble(name, fieldValue));
         }
     };
 
     // Character
     protected final EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            char fieldValue = (char) BeanUtil.getFieldValue(field, destBean);
+            char fieldValue = (char) BeanUtil.getFieldValue(field, dstBean);
             context.setValue(prefs.getInt(name, fieldValue));
         }
     };
 
     // Array
     protected final EachBinder arrayEachBinder = new Binder.ArrayEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             Class<?> fieldElementClass = field.getType().getComponentType();
             if (fieldElementClass.equals(Byte.TYPE)) {
                 // byte array
@@ -136,7 +136,7 @@ public class PreferencesBinder implements Binder {
                 if (name.isEmpty()) {
                     name = field.getName();
                 }
-                byte[] fieldValue = (byte[]) BeanUtil.getFieldValue(field, destBean);
+                byte[] fieldValue = (byte[]) BeanUtil.getFieldValue(field, dstBean);
                 context.setValue(prefs.getByteArray(name, fieldValue));
             } else {
                 throw new IllegalArgumentException("unsupported array: " + fieldElementClass.getName());
@@ -146,12 +146,12 @@ public class PreferencesBinder implements Binder {
 
     // String
     protected final EachBinder stringEachBinder = new Binder.StringEachBinder() {
-        public void bind(EachContext context, Object destBean, Field field) throws IOException {
+        public void bind(EachContext context, Object dstBean, Field field) throws IOException {
             String name = Element.Util.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
-            String fieldValue = (String) BeanUtil.getFieldValue(field, destBean);
+            String fieldValue = (String) BeanUtil.getFieldValue(field, dstBean);
 //logger.log(Level.TRACE, "string: " + name + ", " + prefs.get(name, fieldValue) + ", " + fieldValue + ", " + StringUtil.paramString(field));
             context.setValue(prefs.get(name, fieldValue));
         }

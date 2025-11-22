@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import vavi.io.LittleEndianDataOutputStream;
 import vavi.test.box.Box;
 import vavi.util.ByteUtil;
 import vavi.util.Debug;
+import vavi.util.StringUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -399,6 +401,12 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         B b2;
     }
 
+    /**
+     * enum special specification:
+     * <li>default deserialized value assumed to short size (2) byte array. you can specify the size at {@code value}</li>
+     * <li>default deserialized value is compared with {@code ordinal()}.
+     *     the case if there is a method named {@code getValue()}, it is used instead of {@code ordinal()}.</li>
+     */
     @Test
     @DisplayName("enum")
     void test15() throws Exception {
@@ -464,7 +472,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
     }
 
     @Test
-    @DisplayName("encoding at element and stronger than at serdes")
+    @DisplayName("'encoding' at @Element priority is higher than it at @Serdes")
     void test18() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -571,6 +579,7 @@ Debug.println(test.chldren);
         assertArrayEquals(baos.toByteArray(), test.b);
     }
 
+    // TODO $0 is not while size of beans, but stream length at this moment (just before serialising)
     @Serdes
     static class Test23 {
         @Element(sequence = 1, validation = "$0") // $0 means size of Test23
@@ -638,5 +647,62 @@ Debug.println(test.chldren);
         DataOutputStream dos = new DataOutputStream(expectedBaos);
         dos.writeInt(Test25.A.A2.ordinal());
         assertArrayEquals(expectedBaos.toByteArray(), baos.toByteArray());
+    }
+
+    @Serdes(bigEndian = false)
+    public static class Test26 {
+        @Element(sequence = 1, value = "16") // value is byte length for String
+        @Bound(binder = AsciizBinder.class) // set special binder
+        String a;
+        @Element(sequence = 2)
+        short b;
+    }
+
+    @Test
+    @DisplayName("asciiz binder")
+    void test26() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LittleEndianDataOutputStream ledos = new LittleEndianDataOutputStream(baos);
+Debug.println("bytes: " + StringUtil.getDump("Naohide Sano\0xyz".getBytes()));
+        ledos.write("Naohide Sano\0xyz".getBytes());
+        ledos.writeShort(1234);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        Test26 bean = new Test26();
+        Serdes.Util.deserialize(bais, bean);
+        assertEquals("Naohide Sano", bean.a);
+        assertEquals(1234, bean.b);
+    }
+
+    @Serdes
+    public static class Test27 {
+        @Element(sequence = 1)
+        public int a; // must be public for script engine
+        @Element(sequence = 2)
+        Test27Sub b;
+
+        public int doubler(int x) { // must be public for script engine
+            return x * 2;
+        }
+
+        @Serdes
+        public static class Test27Sub {
+            @Element(sequence = 1, value = "$__.doubler($__.a)") // '$__' is a parent object
+            byte[] c;
+        }
+    }
+
+    @Test
+    @DisplayName("nested class referencing")
+    void test27() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(ByteUtil.getBeBytes(3));
+        baos.write("xyzabc".getBytes());
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        Test27 bean = new Test27();
+        Serdes.Util.deserialize(bais, bean);
+        assertEquals(3, bean.a);
+        assertArrayEquals("xyzabc".getBytes(), bean.b.c);
     }
 }

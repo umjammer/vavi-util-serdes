@@ -46,30 +46,30 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
     }
 
     /**
-     * @param destBean NEVER FILLED VALUES AS RESULT, USE RETURN VALUE
-     * @return new instance of type of destBean
+     * @param dstBean NEVER FILLED VALUES AS RESULT, USE RETURN VALUE
+     * @return new instance of type of dstBean
      */
     @Override
-    public Object deserialize(Object io, Object destBean) throws IOException {
+    public Object deserialize(Object io, Object dstBean) throws IOException {
         if (io instanceof String string) {
-            return xmlMapper.readValue(string, destBean.getClass());
+            return xmlMapper.readValue(string, dstBean.getClass());
         } else if (io instanceof InputStream is) {
-            return xmlMapper.readValue(is, destBean.getClass());
+            return xmlMapper.readValue(is, dstBean.getClass());
         } else {
             throw new IllegalArgumentException("unsupported class: " + io.getClass().getName());
         }
     }
 
     /**
-     * @param destBean NEVER FILLED VALUES WHEN io TYPE IS STRING, USE RETURN VALUE
-     * @return new instance of type of destBean
+     * @param dstBean NEVER FILLED VALUES WHEN io TYPE IS STRING, USE RETURN VALUE
+     * @return new instance of type of dstBean
      */
     @Override
-    public Object serialize(Object destBean, Object io) throws IOException {
+    public Object serialize(Object dstBean, Object io) throws IOException {
         if (io instanceof String) {
-            return xmlMapper.writeValueAsString(destBean);
+            return xmlMapper.writeValueAsString(dstBean);
         } else if (io instanceof OutputStream os) {
-            xmlMapper.writeValue(os, destBean);
+            xmlMapper.writeValue(os, dstBean);
             return io;
         } else {
             throw new IllegalArgumentException("unsupported class: " + io.getClass().getName());

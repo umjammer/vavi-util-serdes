@@ -21,6 +21,7 @@ import vavi.util.ByteUtil;
 import vavi.util.Debug;
 import vavi.util.StringUtil;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -704,5 +705,11 @@ Debug.println("bytes: " + StringUtil.getDump("Naohide Sano\0xyz".getBytes()));
         Serdes.Util.deserialize(bais, bean);
         assertEquals(3, bean.a);
         assertArrayEquals("xyzabc".getBytes(), bean.b.c);
+    }
+
+    @AfterAll
+    static void teardown() throws Exception {
+        if (Boolean.parseBoolean(System.getProperty("vavi.util.serdes.cache.statistics", "false")))
+            Serdes.Cacher.printCacheStatistics();
     }
 }

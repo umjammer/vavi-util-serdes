@@ -10,6 +10,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
+import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CacheResult;
 
 
 /**
@@ -67,44 +69,47 @@ public @interface Element {
     /**
      * TODO annotation for method
      */
-    final class Util {
-
-        private Util() {
-        }
+    class Util {
 
         /** see {@link Element#sequence()} */
-        public static int getSequence(Field field) {
+        @CacheResult(cacheName = "element_sequence")
+        int getSequence(Field field) {
             Element element = field.getAnnotation(Element.class);
             int sequence = element.sequence();
             return sequence;
         }
 
         /** see {@link Element#value()} */
-        public static String getValue(Field field) {
+        @CacheResult(cacheName = "element_value")
+        String getValue(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.value();
         }
 
         /** see {@link Element#bigEndian()} */
-        public static Boolean isBigEndian(Field field) {
+        @CacheResult(cacheName = "element_bigEndian") // TODO null cannot cache
+        Boolean isBigEndian(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.bigEndian().isEmpty() ? null : Boolean.valueOf(element.bigEndian());
         }
 
         /** see {@link Element#validation()} */
-        public static String getValidation(Field field) {
+        @CacheResult(cacheName = "element_validation")
+        String getValidation(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.validation();
         }
 
         /** see {@link Element#condition()} */
-        public static String getCondition(Field field) {
+        @CacheResult(cacheName = "element_condition")
+        String getCondition(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.condition();
         }
 
         /** see {@link Element#encoding()} */
-        public static String getEncoding(Field field) {
+        @CacheResult(cacheName = "element_encoding")
+        String getEncoding(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.encoding();
         }

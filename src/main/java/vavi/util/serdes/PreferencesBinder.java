@@ -33,7 +33,7 @@ public class PreferencesBinder implements Binder {
     // Boolean
     protected final EachBinder booleanEachBinder = new Binder.BooleanEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -45,7 +45,7 @@ public class PreferencesBinder implements Binder {
     // Integer
     protected final EachBinder integerEachBinder = new Binder.IntegerEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -57,7 +57,7 @@ public class PreferencesBinder implements Binder {
     // Short
     protected final EachBinder shortEachBinder = new Binder.ShortEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -69,7 +69,7 @@ public class PreferencesBinder implements Binder {
     // Byte
     protected final EachBinder byteEachBinder = new Binder.ByteEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -81,7 +81,7 @@ public class PreferencesBinder implements Binder {
     // Long
     protected final EachBinder longEachBinder = new Binder.LongEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -93,7 +93,7 @@ public class PreferencesBinder implements Binder {
     // Float
     protected final EachBinder floatEachBinder = new Binder.FloatEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -105,7 +105,7 @@ public class PreferencesBinder implements Binder {
     // Double
     protected final EachBinder doubleEachBinder = new Binder.DoubleEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -117,7 +117,7 @@ public class PreferencesBinder implements Binder {
     // Character
     protected final EachBinder characterEachBinder = new Binder.CharacterEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }
@@ -132,7 +132,7 @@ public class PreferencesBinder implements Binder {
             Class<?> fieldElementClass = field.getType().getComponentType();
             if (fieldElementClass.equals(Byte.TYPE)) {
                 // byte array
-                String name = Element.Util.getValue(field);
+                String name = element.getValue(field);
                 if (name.isEmpty()) {
                     name = field.getName();
                 }
@@ -147,7 +147,7 @@ public class PreferencesBinder implements Binder {
     // String
     protected final EachBinder stringEachBinder = new Binder.StringEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String name = Element.Util.getValue(field);
+            String name = element.getValue(field);
             if (name.isEmpty()) {
                 name = field.getName();
             }

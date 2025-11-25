@@ -34,7 +34,7 @@ public class AsciizBinder implements Binder {
      */
     public void bind(EachContext context, Object dstBean, Field field) throws IOException {
         DefaultEachContext eachContext = (DefaultEachContext) context;
-        String sizeScript = Element.Util.getValue(field);
+        String sizeScript = element.getValue(field);
 logger.log(Level.TRACE, "sizeScript: " + sizeScript);
         if (!sizeScript.isEmpty()) {
             eachContext.size = Double.valueOf(eachContext.eval(sizeScript).toString()).intValue(); // size means array size
@@ -44,9 +44,9 @@ logger.log(Level.TRACE, "sizeScript: " + sizeScript);
         Class<?> fieldClass = field.getType();
         if (fieldClass.equals(String.class)) {
             byte[] bytes = asciiz(eachContext);
-            String encoding = Element.Util.getEncoding(field);
+            String encoding = element.getEncoding(field);
             if (encoding.isEmpty()) {
-                encoding = Serdes.Util.encoding(dstBean);
+                encoding = serdes.encoding(dstBean.getClass());
             }
             if (!encoding.isEmpty()) {
 logger.log(Level.DEBUG, encoding);

@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.cache.annotation.CacheResult;
+
 import vavi.util.serdes.BeanBinder.IOSource;
 import vavi.util.serdes.Binder.EachContext;
 
@@ -44,7 +46,7 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
 
     @Override
     public Object deserialize(Object io, Object dstBean) throws IOException {
-        T in = getIOSource(io, Serdes.Util.isBigEndian(dstBean));
+        T in = getIOSource(io, serdes.isBigEndian(dstBean.getClass()));
         deserialize0(in, dstBean, null);
         return dstBean;
     }
@@ -59,24 +61,24 @@ public abstract class BaseBeanBinder<T extends IOSource> implements BeanBinder<T
      * @param parent nullable
      */
     protected void deserialize0(T in, Object dstBean, Object parent) throws IOException {
-        Serdes.Util.getAnnotation(dstBean);
+        serdes.getAnnotation(dstBean.getClass());
 
         // list up fields
-        List<Field> elementFields = Serdes.Util.getElementFields(dstBean);
+        List<Field> elementFields = serdes.getElementFields(dstBean.getClass());
 
         // injection
         Context context = getContext(in, elementFields, dstBean, parent);
 
         for (Field field : elementFields) {
 
-            int sequence = Element.Util.getSequence(field);
+            int sequence = element.getSequence(field);
 
             // each endian
-            Boolean bigEndian = Element.Util.isBigEndian(field);
+            Boolean bigEndian = element.isBigEndian(field);
             EachContext eachContext = getEachContext(sequence, bigEndian, field, context);
 
             // condition
-            String condition = Element.Util.getCondition(field);
+            String condition = element.getCondition(field);
             if (!condition.isEmpty()) {
                 if (!eachContext.condition(condition)) {
 logger.log(Level.DEBUG, "condition check is false");
@@ -95,7 +97,7 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
             eachContext.settleValues();
 
             // validation
-            String validation = Element.Util.getValidation(field);
+            String validation = element.getValidation(field);
             if (!validation.isEmpty()) {
                 eachContext.validate(validation);
             }
@@ -104,7 +106,7 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
 
     @Override
     public Object serialize(Object srcBean, Object io) throws IOException {
-        T out = getIOSource(io, Serdes.Util.isBigEndian(srcBean));
+        T out = getIOSource(io, serdes.isBigEndian(srcBean.getClass()));
         serialize0(srcBean, out, null);
         return io;
     }
@@ -118,24 +120,24 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
      * @param parent nullable
      */
     protected void serialize0(Object srcBean, T out, Object parent) throws IOException {
-        Serdes.Util.getAnnotation(srcBean);
+        serdes.getAnnotation(srcBean.getClass());
 
         // list up fields
-        List<Field> elementFields = Serdes.Util.getElementFields(srcBean);
+        List<Field> elementFields = serdes.getElementFields(srcBean.getClass());
 
         // extraction
         Context context = getContext(out, elementFields, srcBean, parent);
 
         for (Field field : elementFields) {
 
-            int sequence = Element.Util.getSequence(field);
+            int sequence = element.getSequence(field);
 
             // each endian
-            Boolean bigEndian = Element.Util.isBigEndian(field);
+            Boolean bigEndian = element.isBigEndian(field);
             EachContext eachContext = getEachContext(sequence, bigEndian, field, context);
 
             // condition
-            String condition = Element.Util.getCondition(field);
+            String condition = element.getCondition(field);
             if (!condition.isEmpty()) {
                 if (!eachContext.condition(condition)) {
                     logger.log(Level.DEBUG, "condition check is false");
@@ -144,7 +146,7 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
             }
 
             // validation
-            String validation = Element.Util.getValidation(field);
+            String validation = element.getValidation(field);
             if (!validation.isEmpty()) {
                 eachContext.validate(validation);
             }
@@ -162,19 +164,30 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
         }
     }
 
-    /** @throws IllegalArgumentException validation failed */
-    protected static void validateSequences(List<Field> fields) {
-        Set<Integer> numbers = new HashSet<>();
-        for (Field field : fields) {
-            int sequence = Element.Util.getSequence(field);
-            if (sequence < 1) {
-                throw new IllegalArgumentException("sequence should be > 0: " + field.getName() + ", " + sequence);
+    public static class SequenceValidator {
+
+        /** @throws IllegalArgumentException validation failed */
+        public void validateSequences(Class<?> clazz) {
+            String r = getValidateSequencesState(clazz);
+            if (!r.isEmpty()) throw new IllegalArgumentException(r);
+        }
+
+        @CacheResult(cacheName = "beanBinder_validateSequences")
+        public String getValidateSequencesState(Class<?> clazz) {
+            List<Field> fields = serdes.getElementFields(clazz);
+            Set<Integer> numbers = new HashSet<>();
+            for (Field field : fields) {
+                int sequence = element.getSequence(field);
+                if (sequence < 1) {
+                    return "sequence should be > 0: " + field.getName() + ", " + sequence;
+                }
+                if (numbers.contains(sequence)) {
+                    return "duplicate sequence: " + field.getName() + ", " + sequence;
+                } else {
+                    numbers.add(sequence);
+                }
             }
-            if (numbers.contains(sequence)) {
-                throw new IllegalArgumentException("duplicate sequence: " + field.getName() + ", " + sequence);
-            } else {
-                numbers.add(sequence);
-            }
+            return "";
         }
     }
 }

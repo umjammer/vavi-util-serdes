@@ -82,7 +82,9 @@ public @interface Serdes {
     /** default is {@link DefaultBeanBinder} */
     Class<? extends BeanBinder<? extends BeanBinder.IOSource>> beanBinder() default DefaultBeanBinder.class;
 
-    /** */
+    /**
+     * @see "https://aistudio.google.com/prompts/1Ws7pbMREtUaYDRCz1Jv1t2CVxdUxEdD8"
+     */
     final class Cacher {
 
         private static final Logger logger = System.getLogger(Cacher.class.getName());

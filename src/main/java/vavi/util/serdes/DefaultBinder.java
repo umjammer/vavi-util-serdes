@@ -36,7 +36,7 @@ import static java.lang.System.getLogger;
  * <pre>
  * engine
  *
- *  * beanshell
+ *  * groovy
  *
  * pre-bound variables
  *

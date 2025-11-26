@@ -256,7 +256,7 @@ logger.log(Level.TRACE, "prepare: " + prepare);
         }
 
         /**
-         * beanshell script that used in equals method
+         * groovy script that used in equals method
          * <pre>
          * for normal fields
          *

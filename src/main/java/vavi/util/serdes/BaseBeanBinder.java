@@ -173,7 +173,7 @@ logger.log(Level.DEBUG, field.getName() + ": " + field.getType() + ", " + eachCo
         }
 
         @CacheResult(cacheName = "beanBinder_validateSequences")
-        public String getValidateSequencesState(Class<?> clazz) {
+        String getValidateSequencesState(Class<?> clazz) {
             List<Field> fields = serdes.getElementFields(clazz);
             Set<Integer> numbers = new HashSet<>();
             for (Field field : fields) {

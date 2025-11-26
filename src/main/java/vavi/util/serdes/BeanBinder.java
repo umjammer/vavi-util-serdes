@@ -9,7 +9,6 @@ package vavi.util.serdes;
 import java.io.IOException;
 
 import vavi.util.serdes.BaseBeanBinder.SequenceValidator;
-import vavi.util.serdes.Serdes.Cacher;
 
 
 /**
@@ -21,9 +20,9 @@ import vavi.util.serdes.Serdes.Cacher;
 public interface BeanBinder<IO extends BeanBinder.IOSource> {
 
     /** DI */
-    Serdes.Util serdes = Cacher.injector().getInstance(Serdes.Util.class);
+    Serdes.Util serdes = CachingDIContainer.injector().getInstance(Serdes.Util.class);
 
-    Element.Util element = Cacher.injector().getInstance(Element.Util.class);
+    Element.Util element = CachingDIContainer.injector().getInstance(Element.Util.class);
 
     /** holds io complexity like endian */
     interface IOSource {
@@ -31,7 +30,7 @@ public interface BeanBinder<IO extends BeanBinder.IOSource> {
 
     /** holds conversion context */
     interface Context {
-        SequenceValidator validator = Cacher.injector().getInstance(SequenceValidator.class);
+        SequenceValidator validator = CachingDIContainer.injector().getInstance(SequenceValidator.class);
     }
 
     /**

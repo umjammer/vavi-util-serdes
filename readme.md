@@ -89,8 +89,9 @@
  * ~~Binary Binding~~
  * Text Binding
  * validation engine → "spi" or "method" like *condition*
- * painfully **slow**, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)
-   * cache reflection
+ * ~~painfully **slow**, it's not sufficient performance for huge repetition (e.g. filesystem has a huge amount of files)~~
+   * cache reflection ... It didn't have much effect
+   * it's because of script engine "beanshell", using groovy resolve it. 🎉
  * enable subclass to set `BeanBinder` (currently uses the same BeanBinder of the super class)
  * toString bean binder? (implementation is apache commons?)
  * [MessagePack](https://github.com/msgpack/msgpack-java), [protobuf](https://github.com/protocolbuffers/protobuf/tree/master/java)

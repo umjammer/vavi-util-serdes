@@ -23,7 +23,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -126,7 +125,7 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
      */
     public static class DefaultContext implements BeanBinder.Context {
         final ScriptEngineManager manager = new ScriptEngineManager();
-        final ScriptEngine engine = manager.getEngineByName("beanshell");
+        final ScriptEngine engine = manager.getEngineByName("groovy");
         final Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 
         final DefaultIOSource io;
@@ -141,18 +140,13 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
             this.bean = bean;
             this.beanBinder = beanBinder;
 
-            validateSequences(fields);
+            validator.validateSequences(bean.getClass());
 
-            try {
+logger.log(Level.TRACE, "engine: " + engine.getFactory().getEngineName());
 logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
-                bindings.put("$__", parent);
-                bindings.put("$_", bean);
-                bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length TODO available is not object length but stream length
-                String prepare = "import static " + getClass().getName() + ".*;";
-                engine.eval(prepare);
-            } catch (ScriptException e) {
-                throw new IllegalStateException(e);
-            }
+            bindings.put("$__", parent);
+            bindings.put("$_", bean);
+            bindings.put("$0", ((DefaultInputSource) this.io).available); // "$0" means whole data length TODO available is not object length but stream length
         }
 
         /** for serializing */
@@ -162,13 +156,17 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
             this.bean = bean;
             this.beanBinder = beanBinder;
 
-            validateSequences(fields);
+            validator.validateSequences(bean.getClass());
 
+            bindings.put("$__", parent);
+            bindings.put("$_", bean);
+        }
+
+        Object eval(String script) {
             try {
-                bindings.put("$__", parent);
-                bindings.put("$_", bean);
                 String prepare = "import static " + getClass().getName() + ".*;";
-                engine.eval(prepare);
+logger.log(Level.TRACE, "prepare: " + prepare);
+                return engine.eval(prepare + script);
             } catch (ScriptException e) {
                 throw new IllegalStateException(e);
             }
@@ -195,7 +193,7 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
     /** context for each field */
     public static class DefaultEachContext implements EachContext {
         public final int sequence;
-        public final DefaultContext context;
+        public final DefaultBeanBinder.DefaultContext context;
         public final Field field;
 
         protected Object value;
@@ -220,13 +218,13 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
             this.field = field;
             this.context = (DefaultContext) context;
 
-            if (this.context.io instanceof DefaultInputSource) {
+            if (this.context.io instanceof DefaultBeanBinder.DefaultInputSource) {
                 if (isBigEndian != null) {
                     dis = ((DefaultInputSource) this.context.io).get(isBigEndian);
                 } else {
                     dis = ((DefaultInputSource) this.context.io).defaultDis;
                 }
-            } else if (this.context.io instanceof DefaultOutputSource) {
+            } else if (this.context.io instanceof DefaultBeanBinder.DefaultOutputSource) {
                 if (isBigEndian != null) {
                     dos = ((DefaultOutputSource) this.context.io).get(isBigEndian);
                 } else {
@@ -249,11 +247,7 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
 
         /** @throws IllegalArgumentException eval failed */
         public Object eval(String script) {
-            try {
-                return context.engine.eval(script);
-            } catch (ScriptException e) {
-                throw new IllegalArgumentException(script, e);
-            }
+            return context.eval(script);
         }
 
         @Override
@@ -262,7 +256,7 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
         }
 
         /**
-         * beanshell script that used in equals method
+         * groovy script that used in equals method
          * <pre>
          * for normal fields
          *
@@ -284,12 +278,8 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
             } else {
                 validationScript = "$" + sequence + ".equals(" + validation + ")";
             }
-            try {
-                if (!Boolean.parseBoolean(context.engine.eval(validationScript).toString())) {
-                    throw new IllegalArgumentException("validation for sequence " + sequence + " failed.\n" + validationScript);
-                }
-            } catch (ScriptException e) {
-                throw new IllegalArgumentException(validation, e);
+            if (!Boolean.parseBoolean(eval(validationScript).toString())) {
+                throw new IllegalArgumentException("validation for sequence " + sequence + " failed.\n" + validationScript);
             }
         }
 
@@ -335,9 +325,9 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
 
     @Override
     protected Context getContext(IOSource io, List<Field> fields, Object bean, Object parent) {
-        if (io instanceof DefaultInputSource iio) {
-            return new DefaultContext(iio, fields, bean, parent, this);
-        } else if (io instanceof DefaultOutputSource oio) {
+        if (io instanceof DefaultBeanBinder.DefaultInputSource iio) {
+            return new DefaultBeanBinder.DefaultContext(iio, fields, bean, parent, this);
+        } else if (io instanceof DefaultBeanBinder.DefaultOutputSource oio) {
             return new DefaultContext(oio, fields, bean, parent, this);
         } else {
             throw new IllegalStateException(io.getClass().getName());
@@ -346,6 +336,6 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
 
     @Override
     protected EachContext getEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {
-        return new DefaultEachContext(sequence, isBigEndian, field, context);
+        return new DefaultBeanBinder.DefaultEachContext(sequence, isBigEndian, field, context);
     }
 }

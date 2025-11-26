@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import vavi.beans.BeanUtil;
+import vavi.util.serdes.Serdes.Cacher;
 
 
 /**
@@ -22,6 +23,11 @@ import vavi.beans.BeanUtil;
  * @version 0.00 2022/02/22 umjammer initial version <br>
  */
 public interface Binder {
+
+    /** DI */
+    Serdes.Util serdes = Cacher.injector().getInstance(Serdes.Util.class);
+
+    Element.Util element = Cacher.injector().getInstance(Element.Util.class);
 
     interface EachBinder {
         boolean matches(Class<?> fieldClass);

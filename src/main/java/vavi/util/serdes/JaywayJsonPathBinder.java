@@ -44,7 +44,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Boolean
     protected final EachBinder booleanEachBinder = new BooleanEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Boolean.parseBoolean(text));
         }
@@ -53,7 +53,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Integer
     protected final EachBinder integerEachBinder = new IntegerEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Integer.parseInt(text));
         }
@@ -62,7 +62,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Short
     protected final EachBinder shortEachBinder = new ShortEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Short.parseShort(text));
         }
@@ -71,7 +71,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Byte
     protected final EachBinder byteEachBinder = new ByteEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Byte.parseByte(text));
         }
@@ -80,7 +80,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Long
     protected final EachBinder longEachBinder = new LongEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Long.parseLong(text));
         }
@@ -89,7 +89,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Float
     protected final EachBinder floatEachBinder = new FloatEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Float.parseFloat(text));
         }
@@ -98,7 +98,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Double
     protected final EachBinder doubleEachBinder = new DoubleEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(Double.parseDouble(text));
         }
@@ -107,7 +107,7 @@ public class JaywayJsonPathBinder implements Binder {
     // Character
     protected final EachBinder characterEachBinder = new CharacterEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue((char) Integer.parseInt(text));
         }
@@ -131,7 +131,7 @@ public class JaywayJsonPathBinder implements Binder {
             }
 
             try {
-                String jsonPath = Element.Util.getValue(field);
+                String jsonPath = element.getValue(field);
                 List<String> list = JsonPath.read(source, jsonPath);
 if (list.isEmpty()) {
  logger.log(Level.WARNING, "no list: " + jsonPath);
@@ -152,7 +152,7 @@ if (list.isEmpty()) {
     // String
     protected final EachBinder stringEachBinder = new StringEachBinder() {
         public void bind(EachContext context, Object dstBean, Field field) throws IOException {
-            String jsonPath = Element.Util.getValue(field);
+            String jsonPath = element.getValue(field);
             String text = JsonPath.parse(source).read(jsonPath);
             context.setValue(text);
 logger.log(Level.TRACE, "jsonPath: " + jsonPath + ", string: " + text);

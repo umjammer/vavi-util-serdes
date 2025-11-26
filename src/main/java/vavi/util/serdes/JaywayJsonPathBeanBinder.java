@@ -53,7 +53,7 @@ logger.log(Level.DEBUG, "source: " + source);
         return io;
     }
 
-    /** disable eval (beanshell engine) method */
+    /** disable eval (groovy engine) method */
     protected static class MyDefaultEachContext extends DefaultEachContext {
 
         public MyDefaultEachContext(int sequence, Boolean isBigEndian, Field field, Context context) {

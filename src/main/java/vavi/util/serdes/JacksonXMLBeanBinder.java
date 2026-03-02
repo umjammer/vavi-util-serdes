@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
+import tools.jackson.dataformat.xml.XmlMapper;
 import vavi.util.serdes.JacksonXMLBeanBinder.DummyIOSource;
 
 
@@ -30,11 +27,9 @@ public class JacksonXMLBeanBinder implements BeanBinder<DummyIOSource> {
     private final XmlMapper xmlMapper;
 
     public JacksonXMLBeanBinder() {
-        xmlMapper = new XmlMapper();
-        xmlMapper.configure(FromXmlParser.Feature.EMPTY_ELEMENT_AS_NULL, true);
-        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // @JsonIgnoreProperties(ignoreUnknown = true)
-
-//        xmlMapper.getFactory().getXMLInputFactory().setProperty("javax.xml.stream.isNamespaceAware", false); // no need
+        xmlMapper = XmlMapper.builder()
+            .disable(tools.jackson.dataformat.xml.XmlWriteFeature.WRITE_NULLS_AS_XSI_NIL)
+            .build();
     }
 
     static class DummyIOSource implements BeanBinder.IOSource {

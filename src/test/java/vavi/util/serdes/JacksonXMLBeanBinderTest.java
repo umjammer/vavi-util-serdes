@@ -6,18 +6,14 @@
 
 package vavi.util.serdes;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import vavi.util.Debug;
 
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +49,7 @@ class JacksonXMLBeanBinderTest {
         Test1 test = new Test1();
         String r = Serdes.Util.serialize(test, "");
 Debug.println(r);
-        assertEquals("<Test1><i1>0</i1><s2/><b3>true</b3><i4>98765</i4><s5>namachapanda</s5><i6>0</i6><s7/><ba8/></Test1>", r);
+        assertEquals("<Test1><b3>true</b3><ba8/><i1>0</i1><i4>98765</i4><i6>0</i6><s2/><s5>namachapanda</s5><s7/></Test1>", r);
     }
 
     @Serdes(beanBinder = JacksonXMLBeanBinder.class)
@@ -99,7 +95,6 @@ Debug.println(r);
     void test3() throws Exception {
 
         XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // equals @JsonIgnoreProperties(ignoreUnknown = true)
         Container container = xmlMapper.readValue(xml, Container.class);
 
         assertEquals("item/standard.opf", container.rootfiles.rootfile.get(0).fullPath);
@@ -110,7 +105,6 @@ Debug.println(r);
     void test4() throws Exception {
 
         XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // equals @JsonIgnoreProperties(ignoreUnknown = true)
         Container container = xmlMapper.readValue(Files.newInputStream(Path.of(JacksonXMLBeanBinderTest.class.getResource("/container.xml").toURI())), Container.class);
 
         assertEquals("item/standard.opf", container.rootfiles.rootfile.get(0).fullPath);

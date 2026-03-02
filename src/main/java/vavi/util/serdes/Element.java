@@ -73,7 +73,7 @@ public @interface Element {
 
         /** see {@link Element#sequence()} */
         @CacheResult(cacheName = "element_sequence")
-        int getSequence(Field field) {
+        public int getSequence(Field field) {
             Element element = field.getAnnotation(Element.class);
             int sequence = element.sequence();
             return sequence;
@@ -81,35 +81,35 @@ public @interface Element {
 
         /** see {@link Element#value()} */
         @CacheResult(cacheName = "element_value")
-        String getValue(Field field) {
+        public String getValue(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.value();
         }
 
         /** see {@link Element#bigEndian()} */
         @CacheResult(cacheName = "element_bigEndian") // TODO null cannot cache
-        Boolean isBigEndian(Field field) {
+        public Boolean isBigEndian(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.bigEndian().isEmpty() ? null : Boolean.valueOf(element.bigEndian());
         }
 
         /** see {@link Element#validation()} */
         @CacheResult(cacheName = "element_validation")
-        String getValidation(Field field) {
+        public String getValidation(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.validation();
         }
 
         /** see {@link Element#condition()} */
         @CacheResult(cacheName = "element_condition")
-        String getCondition(Field field) {
+        public String getCondition(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.condition();
         }
 
         /** see {@link Element#encoding()} */
         @CacheResult(cacheName = "element_encoding")
-        String getEncoding(Field field) {
+        public String getEncoding(Field field) {
             Element element = field.getAnnotation(Element.class);
             return element.encoding();
         }

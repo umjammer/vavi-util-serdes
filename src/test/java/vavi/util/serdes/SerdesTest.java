@@ -710,6 +710,6 @@ Debug.println("bytes: " + StringUtil.getDump("Naohide Sano\0xyz".getBytes()));
     @AfterAll
     static void teardown() throws Exception {
         if (Boolean.parseBoolean(System.getProperty("vavi.util.serdes.cache.statistics", "false")))
-            Serdes.Cacher.printCacheStatistics();
+            CachingDIContainer.printCacheStatistics();
     }
 }

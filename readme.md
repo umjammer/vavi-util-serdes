@@ -83,6 +83,10 @@
  * [struct](https://docs.python.org/3/library/struct.html)
  * https://github.com/raydac/java-binary-block-parser
 
+### Lesson
+
+ * beanshell is slow, use groovy
+
 ## TODO
 
  * ~~got error cause betwixt.Validator is abstract~~ 

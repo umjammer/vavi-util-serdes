@@ -52,9 +52,12 @@ public @interface Serdes {
 
         private static final Element.Util element = CachingDIContainer.injector().getInstance(Element.Util.class);
 
-        /** search super classes recursively */
+        /**
+         * search super classes recursively
+         * @see Binder a custom binder can use this
+         */
         @CacheResult(cacheName = "serdes_elementFields")
-        List<Field> getElementFields(Class<?> clazz) {
+        public List<Field> getElementFields(Class<?> clazz) {
             List<Field> elementFields = new ArrayList<>();
 
             while (clazz != null) {
@@ -83,7 +86,7 @@ public @interface Serdes {
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
         @CacheResult(cacheName = "serdes_annotation")
-        Serdes getAnnotation(Class<?> clazz) {
+        public Serdes getAnnotation(Class<?> clazz) {
             while (clazz != null) {
                 Serdes serdesAnnotation = clazz.getAnnotation(Serdes.class);
                 if (serdesAnnotation != null) {
@@ -98,7 +101,7 @@ public @interface Serdes {
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
         @CacheResult(cacheName = "serdes_bigEndian")
-        boolean isBigEndian(Class<?> clazz) {
+        public boolean isBigEndian(Class<?> clazz) {
             Serdes serdesAnnotation = getAnnotation(clazz);
             return serdesAnnotation.bigEndian();
         }
@@ -107,7 +110,7 @@ public @interface Serdes {
          * @throws IllegalArgumentException bean is not annotated with {@link Serdes}
          */
         @CacheResult(cacheName = "serdes_encoding")
-        String encoding(Class<?> clazz) {
+        public String encoding(Class<?> clazz) {
             Serdes serdesAnnotation = getAnnotation(clazz);
             return serdesAnnotation.encoding();
         }
@@ -117,7 +120,7 @@ public @interface Serdes {
          * @throws NullPointerException when field is not annotated by {@link Serdes}
          */
         @CacheResult(cacheName = "serdes_beanBinder")
-        BeanBinder<? extends BeanBinder.IOSource> getBeanBinder(Class<?> clazz) {
+        public BeanBinder<? extends BeanBinder.IOSource> getBeanBinder(Class<?> clazz) {
             Serdes serdesAnnotation = getAnnotation(clazz);
             try {
                 return serdesAnnotation.beanBinder().getDeclaredConstructor().newInstance();

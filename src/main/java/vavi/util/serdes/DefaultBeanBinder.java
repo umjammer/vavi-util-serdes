@@ -162,7 +162,11 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
             bindings.put("$_", bean);
         }
 
-        Object eval(String script) {
+        /**
+         * evaluates a script with the pre-bound variables of this context.
+         * @throws IllegalStateException the script is wrong
+         */
+        public Object eval(String script) {
             try {
                 String prepare = "import static " + getClass().getName() + ".*;";
 logger.log(Level.TRACE, "prepare: " + prepare);

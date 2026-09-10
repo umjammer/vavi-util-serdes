@@ -219,7 +219,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         String s1;
     }
 
-    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder#validateSequences} */
+    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder.SequenceValidator#validateSequences} */
     static class Test8 extends Test8S {
         @Element(sequence = 2, value = "3", validation = "\"Sub\"") // sequence is must be unique among this class and super classes and subclasses
         String s2;
@@ -290,7 +290,7 @@ Debug.println(Level.FINE, "sequence: " + sequence + ", i1: " + i1);
         int i2;
     }
 
-    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder#validateSequences} */
+    /** uniqueness for all sequences are guaranteed by {@link BaseBeanBinder.SequenceValidator#validateSequences} */
     @Test
     @DisplayName("duplicate sequence")
     void test11() throws Exception {

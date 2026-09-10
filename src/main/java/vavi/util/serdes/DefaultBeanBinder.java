@@ -124,9 +124,13 @@ public class DefaultBeanBinder extends BaseBeanBinder<DefaultIOSource> {
      * </pre>
      */
     public static class DefaultContext implements BeanBinder.Context {
-        final ScriptEngineManager manager = new ScriptEngineManager();
-        final ScriptEngine engine = manager.getEngineByName("groovy");
-        final Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        private static final ThreadLocal<ScriptEngine> engineHolder = ThreadLocal.withInitial(() -> {
+            ScriptEngineManager manager = new ScriptEngineManager();
+            return manager.getEngineByName("groovy");
+        });
+
+        final ScriptEngine engine = engineHolder.get();
+        final Bindings bindings = engine.createBindings();
 
         final DefaultIOSource io;
         final List<Field> fields;
@@ -168,9 +172,20 @@ logger.log(Level.TRACE, "parent: " + parent + ", bean: " + bean);
          */
         public Object eval(String script) {
             try {
+                if (bindings.containsKey(script)) {
+                    return bindings.get(script);
+                }
+                try {
+                    return Integer.parseInt(script);
+                } catch (NumberFormatException ignored) {
+                    try {
+                        return Double.parseDouble(script);
+                    } catch (NumberFormatException ignored2) {
+                    }
+                }
                 String prepare = "import static " + getClass().getName() + ".*;";
 logger.log(Level.TRACE, "prepare: " + prepare);
-                return engine.eval(prepare + script);
+                return engine.eval(prepare + script, bindings);
             } catch (ScriptException e) {
                 throw new IllegalStateException(e);
             }

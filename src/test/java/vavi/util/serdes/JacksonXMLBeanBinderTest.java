@@ -10,10 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import vavi.util.Debug;
 
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +53,7 @@ Debug.println(r);
     }
 
     @Serdes(beanBinder = JacksonXMLBeanBinder.class)
-    @JacksonXmlRootElement(localName = "container")
+    @JsonRootName("container")
     public static class Container {
 
         public static class RootFiles {

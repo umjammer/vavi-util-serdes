@@ -118,3 +118,4 @@
  * `int[] type = "unsigned byte"`
  * use w/ default java serialization functionality Object(Input|Output)Stream
  * before/after method???
+ * record class
